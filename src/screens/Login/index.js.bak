@@ -1,8 +1,7 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
-import { apiUrl } from '../../services/api';
 
 // Importando os nossos componentes modulares
 import CustomInput from '../../components/CustomInput';
@@ -14,10 +13,10 @@ export default function Login({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      const res = await fetch(apiUrl('/api/alunos/auth/login'), {
+      const res = await fetch('https://sistema-gestao-atividades-complementares.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), matricula: email.trim(), senha: password })
+        body: JSON.stringify({ email: email.trim(), senha: password })
       });
 
       const data = await res.json();
@@ -33,7 +32,7 @@ export default function Login({ navigation }) {
       navigation.replace('AlunoArea'); 
 
     } catch (error) {
-      Alert.alert('Erro', 'Erro de conexÃ£o com o servidor.');
+      Alert.alert('Erro', 'Erro de conexão com o servidor.');
     }
   };
 
@@ -43,7 +42,7 @@ export default function Login({ navigation }) {
         
         <View style={styles.logoBox}>
           <Text style={styles.logoText}>KORE</Text>
-          <Text style={styles.subtitle}>Sistema de GestÃ£o de Atividades Complementares</Text>
+          <Text style={styles.subtitle}>Sistema de Gestão de Atividades Complementares</Text>
         </View>
 
         {/* Usando nossos Componentes Customizados */}
@@ -57,7 +56,7 @@ export default function Login({ navigation }) {
 
         <CustomInput 
           label="Senha" 
-          placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" 
+          placeholder="••••••••" 
           secureTextEntry={true}
           value={password}
           onChangeText={setPassword}
@@ -71,7 +70,7 @@ export default function Login({ navigation }) {
       </View>
       
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Â© 2026 KORE Sistema de GestÃ£o</Text>
+        <Text style={styles.footerText}>© 2026 KORE Sistema de Gestão</Text>
       </View>
     </KeyboardAvoidingView>
   );

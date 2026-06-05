@@ -1,9 +1,8 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
 import styles from './styles';
-import { apiUrl } from '../../services/api';
 
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
@@ -24,13 +23,13 @@ export default function Envio() {
         setArquivo(result.assets[0]);
       }
     } catch (err) {
-      Alert.alert('Erro', 'NÃ£o foi possÃ­vel selecionar o arquivo.');
+      Alert.alert('Erro', 'Não foi possível selecionar o arquivo.');
     }
   };
 
   const handleEnviar = async () => {
     if (!titulo || !horas || !arquivo) {
-      Alert.alert('AtenÃ§Ã£o', 'Preencha todos os campos e anexe um arquivo antes de enviar.');
+      Alert.alert('Atenção', 'Preencha todos os campos e anexe um arquivo antes de enviar.');
       return;
     }
     
@@ -42,17 +41,17 @@ export default function Envio() {
       formData.append('cargaHoraria', horas);
       
       // =========================================================================
-      // ATENÃ‡ÃƒO AQUI: Troque a palavra 'certificado' abaixo para a palavra exata 
+      // ATENÇÃO AQUI: Troque a palavra 'certificado' abaixo para a palavra exata 
       // que o seu backend espera receber (pode ser 'file', 'documento', 'arquivo', etc).
       // O arquivo do aluno (independente do nome que ele salvou) vai dentro dessa "caixa".
       // =========================================================================
       formData.append('certificado', { 
         uri: arquivo.uri,
-        name: arquivo.name, // O nome original do arquivo do aluno Ã© mantido aqui
+        name: arquivo.name, // O nome original do arquivo do aluno é mantido aqui
         type: arquivo.mimeType || 'application/octet-stream',
       });
 
-      const response = await fetch(apiUrl('/api/alunos/atividades'), {
+      const response = await fetch('https://sistema-gestao-atividades-complementares.onrender.com/api/atividades', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -67,32 +66,32 @@ export default function Envio() {
         return;
       }
 
-      Alert.alert('Sucesso', 'Atividade enviada para anÃ¡lise!');
+      Alert.alert('Sucesso', 'Atividade enviada para análise!');
       
       setTitulo('');
       setHoras('');
       setArquivo(null);
       
     } catch (error) {
-      Alert.alert('Erro', 'Falha na conexÃ£o com o servidor.');
+      Alert.alert('Erro', 'Falha na conexão com o servidor.');
     }
   };
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.pageTitle}>Nova SubmissÃ£o</Text>
+        <Text style={styles.pageTitle}>Nova Submissão</Text>
         <Text style={styles.subtitle}>Preencha os dados e anexe o seu certificado.</Text>
 
         <CustomInput 
-          label="TÃ­tulo da Atividade" 
-          placeholder="Ex: Palestra sobre InteligÃªncia Artificial" 
+          label="Título da Atividade" 
+          placeholder="Ex: Palestra sobre Inteligência Artificial" 
           value={titulo}
           onChangeText={setTitulo}
         />
 
         <CustomInput 
-          label="Carga HorÃ¡ria (h)" 
+          label="Carga Horária (h)" 
           placeholder="Ex: 10" 
           keyboardType="numeric"
           value={horas}
@@ -108,7 +107,7 @@ export default function Envio() {
         </TouchableOpacity>
 
         <CustomButton 
-          title="Enviar para ValidaÃ§Ã£o" 
+          title="Enviar para Validação" 
           onPress={handleEnviar} 
         />
       </ScrollView>

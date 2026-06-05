@@ -1,8 +1,7 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
-import { apiUrl } from '../../services/api';
 
 export default function Dashboard() {
   const [nomeAluno, setNomeAluno] = useState('Aluno');
@@ -21,15 +20,15 @@ export default function Dashboard() {
       const userString = await AsyncStorage.getItem('user');
       if (userString) {
         const user = JSON.parse(userString);
-        // Pega apenas o primeiro nome para ficar amigÃ¡vel (ex: "Juliana")
+        // Pega apenas o primeiro nome para ficar amigável (ex: "Juliana")
         if (user.nome) {
           setNomeAluno(user.nome.split(' ')[0]);
         }
       }
 
-      // 2. Buscando o histÃ³rico para somar as horas
+      // 2. Buscando o histórico para somar as horas
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch(apiUrl('/api/alunos/atividades'), {
+      const response = await fetch('https://sistema-gestao-atividades-complementares.onrender.com/api/atividades', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -45,12 +44,12 @@ export default function Dashboard() {
 
         // Passa por todas as atividades que voltaram do banco
         data.forEach(atividade => {
-          const horas = Number(atividade.cargaHoraria) || 0; // Garante que seja um nÃºmero
+          const horas = Number(atividade.cargaHoraria) || 0; // Garante que seja um número
 
           // Soma de acordo com o status (ajuste as palavras se o seu banco usar termos diferentes)
           if (atividade.status === 'Aprovado' || atividade.status === 'Aprovada') {
             somaAprovadas += horas;
-          } else if (atividade.status === 'Pendente' || atividade.status === 'Em AnÃ¡lise') {
+          } else if (atividade.status === 'Pendente' || atividade.status === 'Em Análise') {
             somaEmAnalise += horas;
           }
         });
@@ -77,7 +76,7 @@ export default function Dashboard() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.welcomeText}>OlÃ¡, {nomeAluno}</Text>
+      <Text style={styles.welcomeText}>Olá, {nomeAluno}</Text>
       <Text style={styles.subtitle}>Acompanhe o seu progresso de horas complementares.</Text>
 
       <View style={styles.cardContainer}>
@@ -87,7 +86,7 @@ export default function Dashboard() {
         </View>
         
         <View style={[styles.card, styles.cardPending]}>
-          <Text style={styles.cardTitle}>Em AnÃ¡lise</Text>
+          <Text style={styles.cardTitle}>Em Análise</Text>
           <Text style={[styles.cardNumber, styles.textPending]}>{horasEmAnalise}h</Text>
         </View>
       </View>
