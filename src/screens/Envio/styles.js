@@ -1,0 +1,41 @@
+import { StyleSheet } from 'react-native';
+
+export default StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+    padding: 20,
+  },
+  pageTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#0f1923',
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 25,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#334155',
+    marginBottom: 8,
+  },
+  uploadBtn: {
+    backgroundColor: '#e2e8f0',
+    padding: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 30,
+    borderStyle: 'dashed',
+    borderWidth: 2,
+    borderColor: '#94a3b8',
+  },
+  uploadBtnText: {
+    color: '#475569',
+    fontWeight: '600',
+    fontSize: 14,
+  }
+});
