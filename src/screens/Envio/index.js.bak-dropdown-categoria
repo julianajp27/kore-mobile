@@ -22,7 +22,6 @@ export default function Envio({ navigation }) {
   const [cursoId, setCursoId] = useState('');
   const [categorias, setCategorias] = useState([]);
   const [categoriaId, setCategoriaId] = useState('');
-  const [categoriaAberta, setCategoriaAberta] = useState(false);
 
   useEffect(() => {
     carregarCategorias();
@@ -100,8 +99,6 @@ export default function Envio({ navigation }) {
       Alert.alert('Erro', 'Não foi possível abrir a câmera.');
     }
   };
-
-  const categoriaSelecionada = categorias.find((categoria) => categoria._id === categoriaId);
 
   const handleEnviar = async () => {
     if (!titulo || !categoriaId || !horas || !arquivo) {
@@ -217,54 +214,34 @@ export default function Envio({ navigation }) {
           onChangeText={setDataRealizacao}
         />
 
-                <Text style={styles.label}>Categoria</Text>
+        <Text style={styles.label}>Categoria</Text>
 
         {carregandoCategorias ? (
           <ActivityIndicator size="small" color="#0066CC" style={{ marginBottom: 16 }} />
         ) : (
-          <View style={styles.categoryBox}>
-            <TouchableOpacity
-              style={styles.categorySelect}
-              onPress={() => setCategoriaAberta(!categoriaAberta)}
-              disabled={loading || categorias.length === 0}
-            >
-              <View style={styles.categorySelectTextBox}>
-                <Text style={[styles.categorySelectText, !categoriaSelecionada && styles.categoryPlaceholder]}>
-                  {categoriaSelecionada ? categoriaSelecionada.nome : 'Selecionar categoria'}
-                </Text>
-                {categoriaSelecionada && (
-                  <Text style={styles.categorySelectMeta}>{categoriaSelecionada.areaParametro}</Text>
-                )}
-              </View>
-              <Text style={styles.categoryChevron}>{categoriaAberta ? '⌃' : '⌄'}</Text>
-            </TouchableOpacity>
-
+          <View style={styles.categoryList}>
             {categorias.length === 0 ? (
               <Text style={styles.helperText}>Nenhuma categoria disponível para o seu curso.</Text>
-            ) : categoriaAberta ? (
-              <View style={styles.categoryList}>
-                {categorias.map((categoria) => {
-                  const selecionada = categoriaId === categoria._id;
+            ) : (
+              categorias.map((categoria) => {
+                const selecionada = categoriaId === categoria._id;
 
-                  return (
-                    <TouchableOpacity
-                      key={categoria._id}
-                      style={[styles.categoryOption, selecionada && styles.categoryOptionSelected]}
-                      onPress={() => {
-                        setCategoriaId(categoria._id);
-                        setCategoriaAberta(false);
-                      }}
-                      disabled={loading}
-                    >
-                      <Text style={styles.categoryTitle}>{categoria.nome}</Text>
-                      <Text style={styles.categoryMeta}>{categoria.areaParametro}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            ) : null}
+                return (
+                  <TouchableOpacity
+                    key={categoria._id}
+                    style={[styles.categoryOption, selecionada && styles.categoryOptionSelected]}
+                    onPress={() => setCategoriaId(categoria._id)}
+                    disabled={loading}
+                  >
+                    <Text style={styles.categoryTitle}>{categoria.nome}</Text>
+                    <Text style={styles.categoryMeta}>{categoria.areaParametro}</Text>
+                  </TouchableOpacity>
+                );
+              })
+            )}
           </View>
         )}
+
         <CustomInput
           label="Carga Horária (h)"
           placeholder="Ex: 10"
@@ -319,5 +296,3 @@ export default function Envio({ navigation }) {
     </KeyboardAvoidingView>
   );
 }
-
-

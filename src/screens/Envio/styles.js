@@ -37,5 +37,73 @@ export default StyleSheet.create({
     color: '#475569',
     fontWeight: '600',
     fontSize: 14,
+  },
+  categoryBox: {
+    marginBottom: 18,
+  },
+  categorySelect: {
+    minHeight: 52,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  categorySelectTextBox: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  categorySelectText: {
+    color: '#0f172a',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  categoryPlaceholder: {
+    color: '#94a3b8',
+    fontWeight: '600',
+  },
+  categorySelectMeta: {
+    color: '#64748b',
+    fontSize: 12,
+    marginTop: 3,
+  },
+  categoryChevron: {
+    color: '#0f172a',
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  categoryList: {
+    marginTop: 8,
+    gap: 8,
+  },
+  categoryOption: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 8,
+    padding: 12,
+  },
+  categoryOptionSelected: {
+    borderColor: '#00b7b3',
+    backgroundColor: '#e6fffb',
+  },
+  categoryTitle: {
+    color: '#0f172a',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  categoryMeta: {
+    color: '#64748b',
+    fontSize: 12,
+    marginTop: 4,
+  },
+  helperText: {
+    color: '#64748b',
+    fontSize: 13,
+    marginTop: 8,
   }
 });
