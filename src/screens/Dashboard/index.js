@@ -1,61 +1,44 @@
 ﻿import AsyncStorage from '@react-native-async-storage/async-storage';
-<<<<<<< HEAD
-import { useFocusEffect } from '@react-navigation/native'; // <-- Adicionado para atualizar ao focar na tela
-import { useCallback, useState } from 'react'; // <-- Trocamos useEffect por useCallback
-=======
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
->>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { apiUrl } from '../../services/api';
 import styles from './styles';
 
-<<<<<<< HEAD
-export default function Dashboard({ navigation }) { 
-=======
-function normalizarLista(data) {
+// --- FUNÇÕES AJUDANTES (Para evitar os erros de 'not defined') ---
+const obterMetaHoras = (user) => {
+  // Se a Renata mandar a meta do aluno no banco, usamos ela. Se não, o padrão é 100.
+  return user?.metaHoras || 100; 
+};
+
+const normalizarLista = (data) => {
+  // Garante que o aplicativo não quebre se a API não devolver uma lista (array)
   if (Array.isArray(data)) return data;
-  return data?.atividades || data?.data || [];
-}
+  if (data && Array.isArray(data.atividades)) return data.atividades;
+  return [];
+};
 
-function normalizarStatus(status) {
-  const s = String(status || '').trim().toLowerCase();
-
-  if (['aprovada', 'aprovado', 'aprovacao', 'aprovação'].includes(s)) return 'aprovada';
-  if (['reprovada', 'reprovado', 'reprovacao', 'reprovação'].includes(s)) return 'reprovada';
-  if (['pendente', 'enviada', 'enviado', 'em análise', 'em analise'].includes(s)) return 'pendente';
-
+const normalizarStatus = (status) => {
+  // Padroniza as palavras para não dar erro se a Renata digitar maiúsculo/minúsculo no banco
+  if (!status) return 'pendente';
+  const s = status.toLowerCase().trim();
+  if (s.includes('aprovad')) return 'aprovada';
+  if (s.includes('reprovad') || s.includes('recusad')) return 'reprovada';
   return 'pendente';
-}
+};
 
-function obterHorasAprovadas(atividade) {
-  return Number(
-    atividade.cargaHorariaValidada ||
-    atividade.cargaHoraria ||
-    atividade.cargaHorariaInformada ||
-    0
-  );
-}
+const obterHorasAprovadas = (atividade) => {
+  // Pega as horas validadas (se existirem) ou a carga horária informada
+  return Number(atividade.horasValidadas || atividade.cargaHoraria || atividade.cargaHorariaInformada) || 0;
+};
 
-function obterHorasPendentes(atividade) {
-  return Number(
-    atividade.cargaHorariaInformada ||
-    atividade.cargaHoraria ||
-    0
-  );
-}
+const obterHorasPendentes = (atividade) => {
+  return Number(atividade.cargaHoraria || atividade.cargaHorariaInformada) || 0;
+};
+// -----------------------------------------------------------------
 
-function obterMetaHoras(user) {
-  return Number(
-    user?.curso?.cargaHorariaTotalComplementar ||
-    user?.cursoId?.cargaHorariaTotalComplementar ||
-    user?.cargaHorariaTotalComplementar ||
-    100
-  );
-}
 
-export default function Dashboard({ navigation }) {
->>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
+export default function Dashboard({ navigation }) { 
   const [nomeAluno, setNomeAluno] = useState('Aluno');
   const [horasAprovadas, setHorasAprovadas] = useState(0);
   const [horasEmAnalise, setHorasEmAnalise] = useState(0);
@@ -64,11 +47,7 @@ export default function Dashboard({ navigation }) {
   const [metaHoras, setMetaHoras] = useState(100);
   const [loading, setLoading] = useState(true);
 
-<<<<<<< HEAD
   // --- A MÁGICA DA ATUALIZAÇÃO ---
-  // Roda sempre que a tela ganha foco (quando você clica na aba Dashboard)
-=======
->>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
   useFocusEffect(
     useCallback(() => {
       carregarDadosDoDashboard();
@@ -134,7 +113,6 @@ export default function Dashboard({ navigation }) {
     }
   };
 
-  // --- FUNÇÃO DE SAIR (LOGOUT) ---
   const handleLogout = () => {
     Alert.alert('Sair do KORE', 'Tem certeza que deseja sair?', [
       { text: 'Cancelar', style: 'cancel' },
@@ -153,7 +131,7 @@ export default function Dashboard({ navigation }) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={styles.loadingContainer || [styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color="#00B7B8" />
       </View>
     );
@@ -195,7 +173,6 @@ export default function Dashboard({ navigation }) {
         </View>
       </View>
 
-<<<<<<< HEAD
       <TouchableOpacity 
         style={{ marginTop: 30, marginBottom: 20, marginHorizontal: 20, alignItems: 'center', padding: 15, backgroundColor: '#FFEBEB', borderRadius: 8 }} 
         onPress={handleLogout}
@@ -205,15 +182,3 @@ export default function Dashboard({ navigation }) {
     </ScrollView>
   );
 }
-=======
-      <TouchableOpacity style={styles.primaryLink} onPress={() => navigation.navigate('Listagem')}>
-        <Text style={styles.primaryLinkText}>Ver certificados</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Sair do Sistema</Text>
-      </TouchableOpacity>
-    </ScrollView>
-  );
-}
->>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed

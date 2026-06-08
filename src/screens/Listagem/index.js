@@ -1,78 +1,30 @@
 ﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Linking, Text, TouchableOpacity, View } from 'react-native'; // <-- Adicionamos o Linking aqui
 import { apiUrl } from '../../services/api';
 import styles from './styles';
 
-function normalizarLista(data) {
-  if (Array.isArray(data)) return data;
-  return data?.atividades || data?.data || [];
-}
-
-function normalizarStatus(status) {
-  const s = String(status || '').trim().toLowerCase();
-
-  if (['aprovada', 'aprovado', 'aprovacao', 'aprovação'].includes(s)) return 'aprovada';
-  if (['reprovada', 'reprovado', 'reprovacao', 'reprovação'].includes(s)) return 'reprovada';
-  if (['pendente', 'enviada', 'enviado', 'em análise', 'em analise'].includes(s)) return 'pendente';
-
-  return 'pendente';
-}
-
-function labelStatus(status) {
-  const normalizado = normalizarStatus(status);
-
-  if (normalizado === 'aprovada') return 'Aprovada';
-  if (normalizado === 'reprovada') return 'Reprovada';
-
-  return 'Em análise';
-}
-
-function obterHoras(item) {
-  return item.cargaHorariaValidada || item.cargaHorariaInformada || item.cargaHoraria || 0;
-}
-
-function obterCategoria(item) {
-  return item.categoriaId?.nome || item.categoria?.nome || item.categoria || 'Categoria não informada';
-}
-
-function obterJustificativa(item) {
-  return (
-    item.justificativaReprovacao ||
-    item.justificativa ||
-    item.motivoReprovacao ||
-    item.observacaoCoordenador ||
-    item.observacao ||
-    ''
-  );
-}
-
-export default function Listagem({ navigation }) {
+export default function Listagem({ navigation }) { 
   const [atividades, setAtividades] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
-<<<<<<< HEAD
       setLoading(true); 
-=======
->>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
       carregarAtividades();
     }, [])
   );
 
   const carregarAtividades = async () => {
     try {
-      setLoading(true);
-
       const token = await AsyncStorage.getItem('token');
-
+      
       const response = await fetch(apiUrl('/api/alunos/atividades'), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Authorization': `Bearer ${token}` 
         }
       });
 
@@ -83,12 +35,8 @@ export default function Listagem({ navigation }) {
         return;
       }
 
-<<<<<<< HEAD
       setAtividades(data.reverse()); 
 
-=======
-      setAtividades(normalizarLista(data).slice().reverse());
->>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
     } catch (error) {
       Alert.alert('Erro', 'Falha na conexão com o servidor.');
     } finally {
@@ -97,65 +45,57 @@ export default function Listagem({ navigation }) {
   };
 
   const handleLogout = () => {
-    Alert.alert('Sair do KORE', 'Tem certeza que deseja sair?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Sim',
-        onPress: async () => {
-          await AsyncStorage.removeItem('token');
-          await AsyncStorage.removeItem('user');
-          navigation.replace('Login');
+    Alert.alert(
+      "Sair do KORE",
+      "Tem certeza que deseja sair?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Sim", 
+          onPress: async () => {
+            await AsyncStorage.removeItem('token');
+            await AsyncStorage.removeItem('user');
+            navigation.replace('Login'); 
+          }
         }
-      }
-    ]);
-  };
-
-  const renderItem = ({ item }) => {
-    const status = normalizarStatus(item.status);
-    const justificativa = obterJustificativa(item);
-
-    return (
-      <View style={styles.itemCard}>
-        <View style={styles.itemHeader}>
-          <View style={styles.itemContent}>
-            <Text style={styles.itemTitle}>{item.titulo || 'Atividade sem título'}</Text>
-            <Text style={styles.itemCategory}>{obterCategoria(item)}</Text>
-            <Text style={styles.itemHours}>{obterHoras(item)} horas</Text>
-          </View>
-
-          <View style={[
-            styles.badge,
-            status === 'aprovada' && styles.badgeApproved,
-            status === 'reprovada' && styles.badgeRejected,
-            status === 'pendente' && styles.badgePending
-          ]}>
-            <Text style={[
-              styles.badgeText,
-              status === 'aprovada' && styles.badgeTextApproved,
-              status === 'reprovada' && styles.badgeTextRejected,
-              status === 'pendente' && styles.badgeTextPending
-            ]}>
-              {labelStatus(item.status)}
-            </Text>
-          </View>
-        </View>
-
-        {status === 'reprovada' && justificativa ? (
-          <View style={styles.rejectionBox}>
-            <Text style={styles.rejectionLabel}>Justificativa</Text>
-            <Text style={styles.rejectionText}>{justificativa}</Text>
-          </View>
-        ) : null}
-      </View>
+      ]
     );
   };
 
-<<<<<<< HEAD
+  // --- NOVA FUNÇÃO PARA ABRIR O ARQUIVO ---
+  const abrirDocumento = async (item) => {
+    // Tenta encontrar onde a Renata salvou a URL do arquivo no banco de dados
+    const urlDoDocumento = item.url || item.arquivoUrl || item.certificadoUrl || item.documento || item.arquivo;
+
+    if (!urlDoDocumento || typeof urlDoDocumento !== 'string') {
+      Alert.alert('Aviso', 'O arquivo deste certificado ainda não está disponível para visualização.');
+      return;
+    }
+
+    try {
+      // Verifica se o celular consegue abrir esse link
+      const supported = await Linking.canOpenURL(urlDoDocumento);
+      
+      if (supported) {
+        await Linking.openURL(urlDoDocumento); // Abre no navegador ou visualizador padrão
+      } else {
+        Alert.alert('Erro', 'O seu celular não suporta a abertura deste link.');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Houve um problema ao tentar abrir o documento.');
+    }
+  };
+
   const renderItem = ({ item }) => {
     const isAprovado = item.status === 'Aprovado' || item.status === 'Aprovada';
 
     return (
-      <View style={styles.itemCard}>
+      // Transformamos a View em TouchableOpacity para o aluno poder clicar!
+      <TouchableOpacity 
+        style={styles.itemCard}
+        activeOpacity={0.7} 
+        onPress={() => abrirDocumento(item)}
+      >
         <View style={styles.itemInfo}>
           <Text style={styles.itemTitle} numberOfLines={2}>{item.titulo}</Text>
           <Text style={styles.itemHours}>{item.cargaHoraria} horas</Text> 
@@ -165,15 +105,13 @@ export default function Listagem({ navigation }) {
             {item.status || 'Pendente'}
           </Text>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
-=======
->>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color="#00B7B8" />
       </View>
     );
@@ -183,9 +121,8 @@ export default function Listagem({ navigation }) {
     <View style={styles.container}>
       <FlatList
         data={atividades}
-        keyExtractor={(item, index) => item._id || String(index)}
+        keyExtractor={item => item._id} 
         renderItem={renderItem}
-<<<<<<< HEAD
         contentContainerStyle={{ padding: 20 }}
         ListEmptyComponent={<Text style={styles.emptyText}>Nenhuma atividade submetida ainda.</Text>}
       />
@@ -195,22 +132,6 @@ export default function Listagem({ navigation }) {
         onPress={handleLogout}
       >
         <Text style={styles.logoutButtonText}>Sair do Sistema</Text>
-=======
-        contentContainerStyle={styles.listContent}
-        ListHeaderComponent={
-          <View style={styles.header}>
-            <Text style={styles.pageTitle}>Certificados</Text>
-            <Text style={styles.subtitle}>Acompanhe o status das suas submissões.</Text>
-          </View>
-        }
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>Nenhuma atividade submetida ainda.</Text>
-        }
-      />
-
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Sair do Sistema</Text>
->>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
       </TouchableOpacity>
     </View>
   );
