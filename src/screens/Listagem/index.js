@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, ActivityIndicator, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+﻿import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, Text, View } from 'react-native';
 import styles from './styles';
 
 export default function Listagem() {
