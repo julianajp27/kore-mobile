@@ -2,7 +2,6 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
-// Vamos criar essas telas no próximo passo!
 import Dashboard from '../screens/Dashboard';
 import Listagem from '../screens/Listagem';
 import Envio from '../screens/Envio';
