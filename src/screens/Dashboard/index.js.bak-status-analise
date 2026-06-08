@@ -45,18 +45,12 @@ export default function Dashboard({ navigation }) { // <-- Adicionado navigation
 
         // Passa por todas as atividades que voltaram do banco
         data.forEach(atividade => {
-          const horas = Number(atividade.cargaHoraria || atividade.cargaHorariaInformada) || 0;
-          const status = String(atividade.status || '').trim().toLowerCase();
+          const horas = Number(atividade.cargaHoraria) || 0; // Garante que seja um número
 
-          if (status === 'aprovado' || status === 'aprovada') {
+          // Soma de acordo com o status (ajuste as palavras se o seu banco usar termos diferentes)
+          if (atividade.status === 'Aprovado' || atividade.status === 'Aprovada') {
             somaAprovadas += horas;
-          } else if (
-            status === 'pendente' ||
-            status === 'em análise' ||
-            status === 'em analise' ||
-            status === 'enviada' ||
-            status === 'enviado'
-          ) {
+          } else if (atividade.status === 'Pendente' || atividade.status === 'Em Análise') {
             somaEmAnalise += horas;
           }
         });
@@ -127,4 +121,3 @@ export default function Dashboard({ navigation }) { // <-- Adicionado navigation
     </ScrollView>
   );
 }
-
