@@ -1,18 +1,74 @@
 ﻿import AsyncStorage from '@react-native-async-storage/async-storage';
+<<<<<<< HEAD
 import { useFocusEffect } from '@react-navigation/native'; // <-- Adicionado para atualizar ao focar na tela
 import { useCallback, useState } from 'react'; // <-- Trocamos useEffect por useCallback
+=======
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
+>>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { apiUrl } from '../../services/api';
 import styles from './styles';
 
+<<<<<<< HEAD
 export default function Dashboard({ navigation }) { 
+=======
+function normalizarLista(data) {
+  if (Array.isArray(data)) return data;
+  return data?.atividades || data?.data || [];
+}
+
+function normalizarStatus(status) {
+  const s = String(status || '').trim().toLowerCase();
+
+  if (['aprovada', 'aprovado', 'aprovacao', 'aprovação'].includes(s)) return 'aprovada';
+  if (['reprovada', 'reprovado', 'reprovacao', 'reprovação'].includes(s)) return 'reprovada';
+  if (['pendente', 'enviada', 'enviado', 'em análise', 'em analise'].includes(s)) return 'pendente';
+
+  return 'pendente';
+}
+
+function obterHorasAprovadas(atividade) {
+  return Number(
+    atividade.cargaHorariaValidada ||
+    atividade.cargaHoraria ||
+    atividade.cargaHorariaInformada ||
+    0
+  );
+}
+
+function obterHorasPendentes(atividade) {
+  return Number(
+    atividade.cargaHorariaInformada ||
+    atividade.cargaHoraria ||
+    0
+  );
+}
+
+function obterMetaHoras(user) {
+  return Number(
+    user?.curso?.cargaHorariaTotalComplementar ||
+    user?.cursoId?.cargaHorariaTotalComplementar ||
+    user?.cargaHorariaTotalComplementar ||
+    100
+  );
+}
+
+export default function Dashboard({ navigation }) {
+>>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
   const [nomeAluno, setNomeAluno] = useState('Aluno');
   const [horasAprovadas, setHorasAprovadas] = useState(0);
   const [horasEmAnalise, setHorasEmAnalise] = useState(0);
+  const [totalAtividades, setTotalAtividades] = useState(0);
+  const [reprovadas, setReprovadas] = useState(0);
+  const [metaHoras, setMetaHoras] = useState(100);
   const [loading, setLoading] = useState(true);
 
+<<<<<<< HEAD
   // --- A MÁGICA DA ATUALIZAÇÃO ---
   // Roda sempre que a tela ganha foco (quando você clica na aba Dashboard)
+=======
+>>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
   useFocusEffect(
     useCallback(() => {
       carregarDadosDoDashboard();
@@ -21,106 +77,125 @@ export default function Dashboard({ navigation }) {
 
   const carregarDadosDoDashboard = async () => {
     try {
-      // 1. Buscando o nome do aluno no AsyncStorage
-      const userString = await AsyncStorage.getItem('user');
-      if (userString) {
-        const user = JSON.parse(userString);
-        // Pega apenas o primeiro nome para ficar amigável (ex: "Juliana")
-        if (user.nome) {
-          setNomeAluno(user.nome.split(' ')[0]);
-        }
-      }
+      setLoading(true);
 
-      // 2. Buscando o histórico para somar as horas
+      const userString = await AsyncStorage.getItem('user');
+      const user = userString ? JSON.parse(userString) : {};
+
+      if (user.nome) setNomeAluno(user.nome.split(' ')[0]);
+      setMetaHoras(obterMetaHoras(user));
+
       const token = await AsyncStorage.getItem('token');
+
       const response = await fetch(apiUrl('/api/alunos/atividades'), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         }
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        let somaAprovadas = 0;
-        let somaEmAnalise = 0;
-
-        // Passa por todas as atividades que voltaram do banco
-        data.forEach(atividade => {
-          const horas = Number(atividade.cargaHoraria || atividade.cargaHorariaInformada) || 0;
-          const status = String(atividade.status || '').trim().toLowerCase();
-
-          if (status === 'aprovado' || status === 'aprovada') {
-            somaAprovadas += horas;
-          } else if (
-            status === 'pendente' ||
-            status === 'em análise' ||
-            status === 'em analise' ||
-            status === 'enviada' ||
-            status === 'enviado'
-          ) {
-            somaEmAnalise += horas;
-          }
-        });
-
-        // Atualiza a tela com os valores reais calculados
-        setHorasAprovadas(somaAprovadas);
-        setHorasEmAnalise(somaEmAnalise);
+      if (!response.ok) {
+        Alert.alert('Erro', data.message || 'Não foi possível carregar o dashboard.');
+        return;
       }
+
+      const atividades = normalizarLista(data);
+      let aprovadasHoras = 0;
+      let pendentesHoras = 0;
+      let qtdReprovadas = 0;
+
+      atividades.forEach((atividade) => {
+        const status = normalizarStatus(atividade.status);
+
+        if (status === 'aprovada') {
+          aprovadasHoras += obterHorasAprovadas(atividade);
+        }
+
+        if (status === 'pendente') {
+          pendentesHoras += obterHorasPendentes(atividade);
+        }
+
+        if (status === 'reprovada') {
+          qtdReprovadas += 1;
+        }
+      });
+
+      setTotalAtividades(atividades.length);
+      setHorasAprovadas(aprovadasHoras);
+      setHorasEmAnalise(pendentesHoras);
+      setReprovadas(qtdReprovadas);
     } catch (error) {
-      console.log('Erro ao carregar o dashboard:', error);
+      Alert.alert('Erro', 'Falha ao carregar dados do dashboard.');
     } finally {
-      setLoading(false); // Tira a bolinha de carregamento
+      setLoading(false);
     }
   };
 
   // --- FUNÇÃO DE SAIR (LOGOUT) ---
   const handleLogout = () => {
-    Alert.alert(
-      "Sair do KORE",
-      "Tem certeza que deseja sair?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        { 
-          text: "Sim", 
-          onPress: async () => {
-            await AsyncStorage.removeItem('token');
-            await AsyncStorage.removeItem('user');
-            navigation.replace('Login'); 
-          }
+    Alert.alert('Sair do KORE', 'Tem certeza que deseja sair?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Sim',
+        onPress: async () => {
+          await AsyncStorage.removeItem('token');
+          await AsyncStorage.removeItem('user');
+          navigation.replace('Login');
         }
-      ]
-    );
+      }
+    ]);
   };
 
-  // Enquanto estiver calculando, mostra um "loading" na tela
+  const progresso = Math.min(100, Math.round((horasAprovadas / metaHoras) * 100));
+
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#00B7B8" />
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.welcomeText}>Olá, {nomeAluno}</Text>
-      <Text style={styles.subtitle}>Acompanhe o seu progresso de horas complementares.</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Text style={styles.pageTitle}>Olá, {nomeAluno}</Text>
+      <Text style={styles.subtitle}>Acompanhe suas atividades complementares.</Text>
 
-      <View style={styles.cardContainer}>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Horas Aprovadas</Text>
-          <Text style={styles.cardNumber}>{horasAprovadas}h</Text>
+      <View style={styles.summaryCard}>
+        <View>
+          <Text style={styles.summaryLabel}>Progresso aprovado</Text>
+          <Text style={styles.summaryValue}>{horasAprovadas}h</Text>
+          <Text style={styles.summaryMeta}>de {metaHoras}h necessárias</Text>
         </View>
-        
-        <View style={[styles.card, styles.cardPending]}>
-          <Text style={styles.cardTitle}>Em Análise</Text>
-          <Text style={[styles.cardNumber, styles.textPending]}>{horasEmAnalise}h</Text>
+
+        <View style={styles.progressTrack}>
+          <View style={[styles.progressFill, { width: `${progresso}%` }]} />
+        </View>
+
+        <Text style={styles.progressText}>{progresso}% concluído</Text>
+      </View>
+
+      <View style={styles.statsGrid}>
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>Em análise</Text>
+          <Text style={styles.statValueWarning}>{horasEmAnalise}h</Text>
+        </View>
+
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>Reprovadas</Text>
+          <Text style={styles.statValueDanger}>{reprovadas}</Text>
+        </View>
+
+        <View style={styles.statCardFull}>
+          <Text style={styles.statLabel}>Atividades enviadas</Text>
+          <Text style={styles.statValue}>{totalAtividades}</Text>
         </View>
       </View>
 
+<<<<<<< HEAD
       <TouchableOpacity 
         style={{ marginTop: 30, marginBottom: 20, marginHorizontal: 20, alignItems: 'center', padding: 15, backgroundColor: '#FFEBEB', borderRadius: 8 }} 
         onPress={handleLogout}
@@ -130,3 +205,15 @@ export default function Dashboard({ navigation }) {
     </ScrollView>
   );
 }
+=======
+      <TouchableOpacity style={styles.primaryLink} onPress={() => navigation.navigate('Listagem')}>
+        <Text style={styles.primaryLinkText}>Ver certificados</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutText}>Sair do Sistema</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+>>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
