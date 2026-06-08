@@ -1,6 +1,6 @@
 ﻿import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native'; // <-- Nova importação mágica das rotas
-import { useCallback, useState } from 'react'; // <-- Mudamos a importação aqui
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { apiUrl } from '../../services/api';
 import styles from './styles';
@@ -9,11 +9,9 @@ export default function Listagem({ navigation }) {
   const [atividades, setAtividades] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- A MÁGICA ACONTECE AQUI ---
-  // Troca o useEffect por useFocusEffect para recarregar sempre que a tela abrir
   useFocusEffect(
     useCallback(() => {
-      setLoading(true); // Faz a bolinha girar de novo para dar feedback visual
+      setLoading(true); 
       carregarAtividades();
     }, [])
   );
@@ -37,8 +35,6 @@ export default function Listagem({ navigation }) {
         return;
       }
 
-      // Se a Renata mandar os itens mais antigos primeiro, podemos inverter a lista
-      // usando data.reverse() para o item novo aparecer no topo!
       setAtividades(data.reverse()); 
 
     } catch (error) {
@@ -66,17 +62,23 @@ export default function Listagem({ navigation }) {
     );
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.itemCard}>
-      <View>
-        <Text style={styles.itemTitle}>{item.titulo}</Text>
-        <Text style={styles.itemHours}>{item.cargaHoraria} horas</Text> 
+  const renderItem = ({ item }) => {
+    const isAprovado = item.status === 'Aprovado' || item.status === 'Aprovada';
+
+    return (
+      <View style={styles.itemCard}>
+        <View style={styles.itemInfo}>
+          <Text style={styles.itemTitle} numberOfLines={2}>{item.titulo}</Text>
+          <Text style={styles.itemHours}>{item.cargaHoraria} horas</Text> 
+        </View>
+        <View style={[styles.badge, isAprovado ? styles.badgeApproved : styles.badgePending]}>
+          <Text style={[styles.badgeText, isAprovado ? styles.badgeTextApproved : styles.badgeTextPending]}>
+            {item.status || 'Pendente'}
+          </Text>
+        </View>
       </View>
-      <View style={[styles.badge, (item.status === 'Aprovado' || item.status === 'Aprovada') ? styles.badgeApproved : styles.badgePending]}>
-        <Text style={styles.badgeText}>{item.status || 'Pendente'}</Text>
-      </View>
-    </View>
-  );
+    );
+  };
 
   if (loading) {
     return (
@@ -93,14 +95,14 @@ export default function Listagem({ navigation }) {
         keyExtractor={item => item._id} 
         renderItem={renderItem}
         contentContainerStyle={{ padding: 20 }}
-        ListEmptyComponent={<Text style={{ textAlign: 'center', color: '#64748b' }}>Nenhuma atividade submetida ainda.</Text>}
+        ListEmptyComponent={<Text style={styles.emptyText}>Nenhuma atividade submetida ainda.</Text>}
       />
 
       <TouchableOpacity 
-        style={{ marginHorizontal: 20, marginBottom: 20, alignItems: 'center', padding: 15, backgroundColor: '#FFEBEB', borderRadius: 8 }} 
+        style={styles.logoutButton} 
         onPress={handleLogout}
       >
-        <Text style={{ color: '#D9534F', fontWeight: 'bold', fontSize: 16 }}>Sair do Sistema</Text>
+        <Text style={styles.logoutButtonText}>Sair do Sistema</Text>
       </TouchableOpacity>
     </View>
   );

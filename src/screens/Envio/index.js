@@ -1,7 +1,8 @@
 ﻿import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { apiUrl } from '../../services/api';
 import styles from './styles';
@@ -24,9 +25,11 @@ export default function Envio({ navigation }) {
   const [categoriaId, setCategoriaId] = useState('');
   const [categoriaAberta, setCategoriaAberta] = useState(false);
 
-  useEffect(() => {
-    carregarCategorias();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      carregarCategorias();
+    }, [])
+  );
 
   const carregarCategorias = async () => {
     setCarregandoCategorias(true);
@@ -47,8 +50,10 @@ export default function Envio({ navigation }) {
         return;
       }
 
+      const listaSegura = Array.isArray(data) ? data : (Array.isArray(data.categorias) ? data.categorias : []);
+      
       setCursoId(data.cursoId || '');
-      setCategorias(Array.isArray(data.categorias) ? data.categorias : []);
+      setCategorias(listaSegura);
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível conectar ao servidor para carregar categorias.');
     } finally {
@@ -101,11 +106,35 @@ export default function Envio({ navigation }) {
     }
   };
 
+  const handleDataChange = (text) => {
+    let numericText = text.replace(/\D/g, '');
+    
+    if (numericText.length > 8) {
+      numericText = numericText.substring(0, 8);
+    }
+    
+    let formattedText = numericText;
+    
+    if (numericText.length > 2 && numericText.length <= 4) {
+      formattedText = `${numericText.substring(0, 2)}/${numericText.substring(2)}`;
+    } else if (numericText.length > 4) {
+      formattedText = `${numericText.substring(0, 2)}/${numericText.substring(2, 4)}/${numericText.substring(4)}`;
+    }
+    
+    setDataRealizacao(formattedText);
+  };
+
+  // --- A linha vital corrigida ---
   const categoriaSelecionada = categorias.find((categoria) => categoria._id === categoriaId);
 
   const handleEnviar = async () => {
     if (!titulo || !categoriaId || !horas || !arquivo) {
       Alert.alert('Atenção', 'Preencha título, categoria, carga horária e anexe um certificado.');
+      return;
+    }
+
+    if (dataRealizacao && dataRealizacao.length !== 10) {
+      Alert.alert('Atenção', 'A data de realização deve estar no formato DD/MM/AAAA.');
       return;
     }
 
@@ -123,7 +152,9 @@ export default function Envio({ navigation }) {
       formData.append('cargaHorariaInformada', horas);
 
       if (dataRealizacao) {
-        formData.append('dataRealizacao', dataRealizacao);
+        const [dia, mes, ano] = dataRealizacao.split('/');
+        const dataISO = `${ano}-${mes}-${dia}`;
+        formData.append('dataRealizacao', dataISO);
       }
 
       formData.append('certificado', {
@@ -211,13 +242,15 @@ export default function Envio({ navigation }) {
         />
 
         <CustomInput
-          label="Data de Realização"
-          placeholder="Ex: 2026-06-06"
+          label="Data de Realização (Opcional)"
+          placeholder="Ex: 08/06/2026"
           value={dataRealizacao}
-          onChangeText={setDataRealizacao}
+          onChangeText={handleDataChange}
+          keyboardType="numeric"
+          maxLength={10}
         />
 
-                <Text style={styles.label}>Categoria</Text>
+        <Text style={styles.label}>Categoria</Text>
 
         {carregandoCategorias ? (
           <ActivityIndicator size="small" color="#0066CC" style={{ marginBottom: 16 }} />
@@ -265,6 +298,7 @@ export default function Envio({ navigation }) {
             ) : null}
           </View>
         )}
+        
         <CustomInput
           label="Carga Horária (h)"
           placeholder="Ex: 10"
@@ -319,5 +353,3 @@ export default function Envio({ navigation }) {
     </KeyboardAvoidingView>
   );
 }
-
-

@@ -1,19 +1,23 @@
 ﻿import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native'; // <-- Adicionados Alert e TouchableOpacity
+import { useFocusEffect } from '@react-navigation/native'; // <-- Adicionado para atualizar ao focar na tela
+import { useCallback, useState } from 'react'; // <-- Trocamos useEffect por useCallback
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { apiUrl } from '../../services/api';
 import styles from './styles';
 
-export default function Dashboard({ navigation }) { // <-- Adicionado navigation
+export default function Dashboard({ navigation }) { 
   const [nomeAluno, setNomeAluno] = useState('Aluno');
   const [horasAprovadas, setHorasAprovadas] = useState(0);
   const [horasEmAnalise, setHorasEmAnalise] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // O useEffect roda assim que a tela abre
-  useEffect(() => {
-    carregarDadosDoDashboard();
-  }, []);
+  // --- A MÁGICA DA ATUALIZAÇÃO ---
+  // Roda sempre que a tela ganha foco (quando você clica na aba Dashboard)
+  useFocusEffect(
+    useCallback(() => {
+      carregarDadosDoDashboard();
+    }, [])
+  );
 
   const carregarDadosDoDashboard = async () => {
     try {
@@ -72,7 +76,7 @@ export default function Dashboard({ navigation }) { // <-- Adicionado navigation
     }
   };
 
-  // --- NOVA FUNÇÃO DE SAIR (LOGOUT) ---
+  // --- FUNÇÃO DE SAIR (LOGOUT) ---
   const handleLogout = () => {
     Alert.alert(
       "Sair do KORE",
@@ -117,7 +121,6 @@ export default function Dashboard({ navigation }) { // <-- Adicionado navigation
         </View>
       </View>
 
-      {/* --- NOVO BOTÃO DE SAIR VISUAL --- */}
       <TouchableOpacity 
         style={{ marginTop: 30, marginBottom: 20, marginHorizontal: 20, alignItems: 'center', padding: 15, backgroundColor: '#FFEBEB', borderRadius: 8 }} 
         onPress={handleLogout}
@@ -127,4 +130,3 @@ export default function Dashboard({ navigation }) { // <-- Adicionado navigation
     </ScrollView>
   );
 }
-

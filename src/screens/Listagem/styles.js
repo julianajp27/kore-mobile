@@ -3,44 +3,73 @@ import { StyleSheet } from 'react-native';
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#FAFAFA', // O fundo clarinho que já estava na sua imagem
+  },
+  emptyText: {
+    textAlign: 'center', 
+    color: '#6c757d',
+    marginTop: 20,
+    fontSize: 16,
   },
   itemCard: {
-    backgroundColor: '#fff',
-    padding: 15,
+    backgroundColor: '#FFFFFF',
+    padding: 16,
     borderRadius: 8,
-    marginBottom: 10,
+    marginBottom: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: '#EAEAEA', // Bordinha bem fina e elegante
+  },
+  itemInfo: {
+    flex: 1,
+    paddingRight: 10,
   },
   itemTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#0f1923',
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 4,
   },
   itemHours: {
-    fontSize: 12,
-    color: '#64748b',
-    marginTop: 4,
+    fontSize: 14,
+    color: '#777777',
   },
   badge: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   badgeApproved: {
-    backgroundColor: '#d1fae5',
+    backgroundColor: '#E8F5E9', // Verde claro para aprovado
   },
   badgePending: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: '#FFF9C4', // Amarelo claro para pendente
   },
   badgeText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#334155',
+  },
+  badgeTextApproved: {
+    color: '#2E7D32', // Texto verde escuro
+  },
+  badgeTextPending: {
+    color: '#F57F17', // Texto laranja escuro
+  },
+  logoutButton: {
+    marginHorizontal: 20, 
+    marginBottom: 20, 
+    alignItems: 'center', 
+    padding: 15, 
+    backgroundColor: '#FFEBEB', 
+    borderRadius: 8,
+  },
+  logoutButtonText: {
+    color: '#D9534F', 
+    fontWeight: 'bold', 
+    fontSize: 16,
   }
 });
