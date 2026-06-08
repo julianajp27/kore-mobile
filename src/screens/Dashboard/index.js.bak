@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+﻿import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native'; // <-- Adicionados Alert e TouchableOpacity
+import { apiUrl } from '../../services/api';
 import styles from './styles';
 
-export default function Dashboard() {
+export default function Dashboard({ navigation }) { // <-- Adicionado navigation
   const [nomeAluno, setNomeAluno] = useState('Aluno');
   const [horasAprovadas, setHorasAprovadas] = useState(0);
   const [horasEmAnalise, setHorasEmAnalise] = useState(0);
@@ -28,7 +29,7 @@ export default function Dashboard() {
 
       // 2. Buscando o histórico para somar as horas
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch('https://sistema-gestao-atividades-complementares.onrender.com/api/atividades', {
+      const response = await fetch(apiUrl('/api/alunos/atividades'), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -44,12 +45,18 @@ export default function Dashboard() {
 
         // Passa por todas as atividades que voltaram do banco
         data.forEach(atividade => {
-          const horas = Number(atividade.cargaHoraria) || 0; // Garante que seja um número
+          const horas = Number(atividade.cargaHoraria || atividade.cargaHorariaInformada) || 0;
+          const status = String(atividade.status || '').trim().toLowerCase();
 
-          // Soma de acordo com o status (ajuste as palavras se o seu banco usar termos diferentes)
-          if (atividade.status === 'Aprovado' || atividade.status === 'Aprovada') {
+          if (status === 'aprovado' || status === 'aprovada') {
             somaAprovadas += horas;
-          } else if (atividade.status === 'Pendente' || atividade.status === 'Em Análise') {
+          } else if (
+            status === 'pendente' ||
+            status === 'em análise' ||
+            status === 'em analise' ||
+            status === 'enviada' ||
+            status === 'enviado'
+          ) {
             somaEmAnalise += horas;
           }
         });
@@ -63,6 +70,25 @@ export default function Dashboard() {
     } finally {
       setLoading(false); // Tira a bolinha de carregamento
     }
+  };
+
+  // --- NOVA FUNÇÃO DE SAIR (LOGOUT) ---
+  const handleLogout = () => {
+    Alert.alert(
+      "Sair do KORE",
+      "Tem certeza que deseja sair?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Sim", 
+          onPress: async () => {
+            await AsyncStorage.removeItem('token');
+            await AsyncStorage.removeItem('user');
+            navigation.replace('Login'); 
+          }
+        }
+      ]
+    );
   };
 
   // Enquanto estiver calculando, mostra um "loading" na tela
@@ -90,6 +116,15 @@ export default function Dashboard() {
           <Text style={[styles.cardNumber, styles.textPending]}>{horasEmAnalise}h</Text>
         </View>
       </View>
+
+      {/* --- NOVO BOTÃO DE SAIR VISUAL --- */}
+      <TouchableOpacity 
+        style={{ marginTop: 30, marginBottom: 20, marginHorizontal: 20, alignItems: 'center', padding: 15, backgroundColor: '#FFEBEB', borderRadius: 8 }} 
+        onPress={handleLogout}
+      >
+        <Text style={{ color: '#D9534F', fontWeight: 'bold', fontSize: 16 }}>Sair do Sistema</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
+
