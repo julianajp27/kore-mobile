@@ -1,25 +1,74 @@
 ﻿import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { apiUrl } from '../../services/api';
 import styles from './styles';
 
-export default function Listagem() {
+function normalizarLista(data) {
+  if (Array.isArray(data)) return data;
+  return data?.atividades || data?.data || [];
+}
+
+function normalizarStatus(status) {
+  const s = String(status || '').trim().toLowerCase();
+
+  if (['aprovada', 'aprovado', 'aprovacao', 'aprovação'].includes(s)) return 'aprovada';
+  if (['reprovada', 'reprovado', 'reprovacao', 'reprovação'].includes(s)) return 'reprovada';
+  if (['pendente', 'enviada', 'enviado', 'em análise', 'em analise'].includes(s)) return 'pendente';
+
+  return 'pendente';
+}
+
+function labelStatus(status) {
+  const normalizado = normalizarStatus(status);
+
+  if (normalizado === 'aprovada') return 'Aprovada';
+  if (normalizado === 'reprovada') return 'Reprovada';
+
+  return 'Em análise';
+}
+
+function obterHoras(item) {
+  return item.cargaHorariaValidada || item.cargaHorariaInformada || item.cargaHoraria || 0;
+}
+
+function obterCategoria(item) {
+  return item.categoriaId?.nome || item.categoria?.nome || item.categoria || 'Categoria não informada';
+}
+
+function obterJustificativa(item) {
+  return (
+    item.justificativaReprovacao ||
+    item.justificativa ||
+    item.motivoReprovacao ||
+    item.observacaoCoordenador ||
+    item.observacao ||
+    ''
+  );
+}
+
+export default function Listagem({ navigation }) {
   const [atividades, setAtividades] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    carregarAtividades();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      carregarAtividades();
+    }, [])
+  );
 
   const carregarAtividades = async () => {
     try {
+      setLoading(true);
+
       const token = await AsyncStorage.getItem('token');
-      
-      const response = await fetch('https://sistema-gestao-atividades-complementares.onrender.com/api/atividades', {
+
+      const response = await fetch(apiUrl('/api/alunos/atividades'), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Passando o token de segurança
+          Authorization: `Bearer ${token}`
         }
       });
 
@@ -30,7 +79,7 @@ export default function Listagem() {
         return;
       }
 
-      setAtividades(data); // Salva os dados reais vindos do MongoDB
+      setAtividades(normalizarLista(data).slice().reverse());
     } catch (error) {
       Alert.alert('Erro', 'Falha na conexão com o servidor.');
     } finally {
@@ -38,21 +87,63 @@ export default function Listagem() {
     }
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.itemCard}>
-      <View>
-        <Text style={styles.itemTitle}>{item.titulo}</Text>
-        <Text style={styles.itemHours}>{item.cargaHoraria} horas</Text> 
+  const handleLogout = () => {
+    Alert.alert('Sair do KORE', 'Tem certeza que deseja sair?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Sim',
+        onPress: async () => {
+          await AsyncStorage.removeItem('token');
+          await AsyncStorage.removeItem('user');
+          navigation.replace('Login');
+        }
+      }
+    ]);
+  };
+
+  const renderItem = ({ item }) => {
+    const status = normalizarStatus(item.status);
+    const justificativa = obterJustificativa(item);
+
+    return (
+      <View style={styles.itemCard}>
+        <View style={styles.itemHeader}>
+          <View style={styles.itemContent}>
+            <Text style={styles.itemTitle}>{item.titulo || 'Atividade sem título'}</Text>
+            <Text style={styles.itemCategory}>{obterCategoria(item)}</Text>
+            <Text style={styles.itemHours}>{obterHoras(item)} horas</Text>
+          </View>
+
+          <View style={[
+            styles.badge,
+            status === 'aprovada' && styles.badgeApproved,
+            status === 'reprovada' && styles.badgeRejected,
+            status === 'pendente' && styles.badgePending
+          ]}>
+            <Text style={[
+              styles.badgeText,
+              status === 'aprovada' && styles.badgeTextApproved,
+              status === 'reprovada' && styles.badgeTextRejected,
+              status === 'pendente' && styles.badgeTextPending
+            ]}>
+              {labelStatus(item.status)}
+            </Text>
+          </View>
+        </View>
+
+        {status === 'reprovada' && justificativa ? (
+          <View style={styles.rejectionBox}>
+            <Text style={styles.rejectionLabel}>Justificativa</Text>
+            <Text style={styles.rejectionText}>{justificativa}</Text>
+          </View>
+        ) : null}
       </View>
-      <View style={[styles.badge, item.status === 'Aprovado' ? styles.badgeApproved : styles.badgePending]}>
-        <Text style={styles.badgeText}>{item.status}</Text>
-      </View>
-    </View>
-  );
+    );
+  };
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#00B7B8" />
       </View>
     );
@@ -62,11 +153,23 @@ export default function Listagem() {
     <View style={styles.container}>
       <FlatList
         data={atividades}
-        keyExtractor={item => item._id} // O MongoDB usa _id
+        keyExtractor={(item, index) => item._id || String(index)}
         renderItem={renderItem}
-        contentContainerStyle={{ padding: 20 }}
-        ListEmptyComponent={<Text style={{ textAlign: 'center', color: '#64748b' }}>Nenhuma atividade submetida ainda.</Text>}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <Text style={styles.pageTitle}>Certificados</Text>
+            <Text style={styles.subtitle}>Acompanhe o status das suas submissões.</Text>
+          </View>
+        }
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>Nenhuma atividade submetida ainda.</Text>
+        }
       />
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutText}>Sair do Sistema</Text>
+      </TouchableOpacity>
     </View>
   );
 }
