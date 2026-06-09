@@ -1,218 +1,177 @@
-<<<<<<< HEAD
-import React, { useState } from 'react';
-import { View, Text, Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import styles from './styles';
-
-// Importando os nossos componentes modulares
-import CustomInput from '../../components/CustomInput';
-import CustomButton from '../../components/CustomButton';
-
-export default function Login({ navigation }) {
-=======
 ﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Text, TouchableOpacity, View } from 'react-native';
+import CustomButton from '../../components/CustomButton';
+import CustomInput from '../../components/CustomInput';
 import { apiUrl } from '../../services/api';
 import styles from './styles';
 
-// Importando os nossos componentes modulares
-import CustomButton from '../../components/CustomButton';
-import CustomInput from '../../components/CustomInput';
-
 export default function Login({ navigation }) {
-  // --- ESTADO DE CARREGAMENTO ---
-  const [loading, setLoading] = useState(false); // Vai controlar a bolinha de loading
-
-  // --- ESTADOS DO PRIMEIRO ACESSO ---
+  const [loading, setLoading] = useState(false);
   const [isPrimeiroAcesso, setIsPrimeiroAcesso] = useState(false);
+
   const [matriculaAcesso, setMatriculaAcesso] = useState('');
+  const [login, setLogin] = useState('');
+  const [senha, setSenha] = useState('');
 
-  // --- ESTADOS NORMAIS DE LOGIN ---
->>>>>>> ajustes-rotas-submissao
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const limparCampos = () => {
+    setMatriculaAcesso('');
+    setLogin('');
+    setSenha('');
+  };
 
-  const handleLogin = async () => {
-<<<<<<< HEAD
+  const handlePrimeiroAcesso = async () => {
+    if (!matriculaAcesso.trim() || !login.trim() || !senha) {
+      Alert.alert('Aviso', 'Preencha matrícula, e-mail e a nova senha.');
+      return;
+    }
+
     try {
-      const res = await fetch('https://sistema-gestao-atividades-complementares.onrender.com/api/auth/login', {
+      setLoading(true);
+
+      const response = await fetch(apiUrl('/api/alunos/auth/primeiro-acesso'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), senha: password })
+        body: JSON.stringify({
+          matricula: matriculaAcesso.trim(),
+          email: login.trim(),
+          novaSenha: senha
+        })
       });
 
-      const data = await res.json();
+      const data = await response.json();
 
-      if (!res.ok) {
-        Alert.alert('Erro', data.message || data.mensagem || 'Erro ao fazer login');
+      if (!response.ok) {
+        Alert.alert('Erro', data.message || data.mensagem || 'Dados não conferem com o cadastro.');
         return;
       }
 
-      await AsyncStorage.setItem('token', data.token);
-      await AsyncStorage.setItem('user', JSON.stringify(data.usuario));
-
-      navigation.replace('AlunoArea'); 
-
+      Alert.alert('Sucesso', 'Senha cadastrada. Agora faça login.');
+      setIsPrimeiroAcesso(false);
+      limparCampos();
     } catch (error) {
-      Alert.alert('Erro', 'Erro de conexão com o servidor.');
-=======
-    // ---------------------------------------------------------
-    // FLUXO 1: PRIMEIRO ACESSO (CRIAR SENHA)
-    // ---------------------------------------------------------
-    if (isPrimeiroAcesso) {
-      if (!matriculaAcesso || !email || !password) {
-        Alert.alert('Aviso', 'Preencha matrícula, e-mail e a nova senha.');
-        return;
-      }
-
-      setLoading(true); // Liga a bolinha de carregamento
-      try {
-        const res = await fetch(apiUrl('/api/alunos/auth/primeiro-acesso'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            matricula: matriculaAcesso.trim(), 
-            email: email.trim(), 
-            novaSenha: password 
-          })
-        });
-
-        if (res.ok) {
-          Alert.alert('Sucesso!', 'Sua senha foi cadastrada. Faça o login para entrar.');
-          setIsPrimeiroAcesso(false); 
-          setPassword(''); 
-        } else {
-          const data = await res.json();
-          Alert.alert('Erro', data.message || data.mensagem || 'Dados não conferem com o cadastro da coordenação.');
-        }
-      } catch (error) {
-        Alert.alert('Erro', 'Não foi possível conectar ao servidor. Verifique sua internet.');
-      } finally {
-        setLoading(false); // Desliga a bolinha independentemente de dar erro ou sucesso
-      }
-    } 
-    // ---------------------------------------------------------
-    // FLUXO 2: LOGIN NORMAL
-    // ---------------------------------------------------------
-    else {
-      // VALIDAÇÃO NOVA: Impede de enviar campos vazios
-      if (!email || !password) {
-        Alert.alert('Aviso', 'Preencha seu E-mail/Matrícula e sua Senha.');
-        return;
-      }
-
-      setLoading(true); // Liga a bolinha de carregamento
-      try {
-        const res = await fetch(apiUrl('/api/alunos/auth/login'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email.trim(), matricula: email.trim(), senha: password })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          Alert.alert('Erro', data.message || data.mensagem || 'Usuário ou senha incorretos.');
-          return; // Para a execução aqui se der erro
-        }
-
-        // Se chegou aqui, o login deu certo!
-        await AsyncStorage.setItem('token', data.token);
-        await AsyncStorage.setItem('user', JSON.stringify(data.usuario));
-
-        // NOME CORRIGIDO: Redirecionando para o nome exato que está no seu routes.js
-        navigation.replace('AlunoArea'); 
-
-      } catch (error) {
-        Alert.alert('Erro', 'Não foi possível conectar ao servidor. Verifique sua internet ou tente novamente em alguns segundos.');
-      } finally {
-        setLoading(false); // Desliga a bolinha
-      }
->>>>>>> ajustes-rotas-submissao
+      Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleLoginNormal = async () => {
+    if (!login.trim() || !senha) {
+      Alert.alert('Aviso', 'Preencha login/matrícula e senha.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const loginLimpo = login.trim();
+
+      const response = await fetch(apiUrl('/api/alunos/auth/login'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: loginLimpo,
+          matricula: loginLimpo,
+          senha
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        Alert.alert('Erro', data.message || data.mensagem || 'Usuário ou senha incorretos.');
+        return;
+      }
+
+      const token = data.token;
+      const usuario = data.usuario || data.aluno || data.user || data;
+
+      if (!token) {
+        Alert.alert('Erro', 'Token não retornado pela API.');
+        return;
+      }
+
+      await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('user', JSON.stringify(usuario));
+
+      navigation.replace('AlunoArea');
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (isPrimeiroAcesso) {
+      handlePrimeiroAcesso();
+      return;
+    }
+
+    handleLoginNormal();
+  };
+
+  const alternarPrimeiroAcesso = () => {
+    setIsPrimeiroAcesso(!isPrimeiroAcesso);
+    limparCampos();
   };
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       <View style={styles.loginCard}>
-        
         <View style={styles.logoBox}>
           <Text style={styles.logoText}>KORE</Text>
           <Text style={styles.subtitle}>Sistema de Gestão de Atividades Complementares</Text>
         </View>
 
-<<<<<<< HEAD
-        {/* Usando nossos Componentes Customizados */}
-        <CustomInput 
-          label="Email" 
-          placeholder="seu@email.com" 
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-
-        <CustomInput 
-          label="Senha" 
-=======
         {isPrimeiroAcesso && (
-          <CustomInput 
-            label="Matrícula" 
-            placeholder="Sua matrícula" 
+          <CustomInput
+            label="Matrícula"
+            placeholder="Sua matrícula"
             value={matriculaAcesso}
             onChangeText={setMatriculaAcesso}
+            keyboardType="numeric"
           />
         )}
 
-        <CustomInput 
-          label={isPrimeiroAcesso ? "E-mail" : "Login"} 
-          placeholder={isPrimeiroAcesso ? "E-mail cadastrado" : "E-mail ou Matrícula"} 
+        <CustomInput
+          label={isPrimeiroAcesso ? 'E-mail' : 'Login'}
+          placeholder={isPrimeiroAcesso ? 'E-mail cadastrado' : 'E-mail ou matrícula'}
           keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none" // Ajuda a não colocar primeira letra maiúscula no email
+          value={login}
+          onChangeText={setLogin}
+          autoCapitalize="none"
         />
 
-        <CustomInput 
-          label={isPrimeiroAcesso ? "Nova Senha" : "Senha"} 
->>>>>>> ajustes-rotas-submissao
-          placeholder="••••••••" 
-          secureTextEntry={true}
-          value={password}
-          onChangeText={setPassword}
+        <CustomInput
+          label={isPrimeiroAcesso ? 'Nova Senha' : 'Senha'}
+          placeholder="••••••••"
+          secureTextEntry
+          value={senha}
+          onChangeText={setSenha}
         />
 
-<<<<<<< HEAD
-        <CustomButton 
-          title="Entrar" 
-          onPress={handleLogin} 
-        />
-=======
-        {/* Lógica Visual: Se estiver carregando mostra a bolinha, senão mostra o botão */}
         {loading ? (
-          <ActivityIndicator size="large" color="#0066CC" style={{ marginTop: 20 }} />
+          <ActivityIndicator size="large" color="#00B7B8" style={styles.loading} />
         ) : (
-          <CustomButton 
-            title={isPrimeiroAcesso ? "Salvar Nova Senha" : "Entrar"} 
-            onPress={handleLogin} 
+          <CustomButton
+            title={isPrimeiroAcesso ? 'Salvar Nova Senha' : 'Entrar'}
+            onPress={handleSubmit}
           />
         )}
 
-        <TouchableOpacity 
-          style={{ marginTop: 20, alignItems: 'center' }} 
-          onPress={() => setIsPrimeiroAcesso(!isPrimeiroAcesso)}
-          disabled={loading} // Impede de trocar de tela enquanto carrega
+        <TouchableOpacity
+          style={styles.firstAccessButton}
+          onPress={alternarPrimeiroAcesso}
+          disabled={loading}
         >
-          <Text style={{ color: '#0066CC', fontWeight: 'bold', fontSize: 14 }}>
-            {isPrimeiroAcesso 
-              ? "Já tem uma senha? Faça o Login" 
-              : "Primeiro Acesso? Clique aqui"}
+          <Text style={styles.firstAccessText}>
+            {isPrimeiroAcesso ? 'Já tem uma senha? Faça o login' : 'Primeiro Acesso? Clique aqui'}
           </Text>
         </TouchableOpacity>
->>>>>>> ajustes-rotas-submissao
-
       </View>
-      
+
       <View style={styles.footer}>
         <Text style={styles.footerText}>© 2026 KORE Sistema de Gestão</Text>
       </View>

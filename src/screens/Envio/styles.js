@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { StyleSheet } from 'react-native';
-=======
 ﻿import { StyleSheet } from 'react-native';
->>>>>>> ajustes-rotas-submissao
 
 export default StyleSheet.create({
   container: {
@@ -12,7 +8,7 @@ export default StyleSheet.create({
   },
   pageTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: '#0f1923',
     marginBottom: 5,
   },
@@ -27,12 +23,84 @@ export default StyleSheet.create({
     color: '#334155',
     marginBottom: 8,
   },
+  categorySelect: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  categorySelectTextBox: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  categorySelectText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#0f1923',
+  },
+  categoryPlaceholder: {
+    color: '#94a3b8',
+    fontWeight: '500',
+  },
+  categorySelectMeta: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 3,
+  },
+  categoryChevron: {
+    fontSize: 18,
+    color: '#64748b',
+    fontWeight: '700',
+  },
+  categoryList: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    marginBottom: 18,
+    overflow: 'hidden',
+  },
+  categoryOption: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  categoryOptionSelected: {
+    backgroundColor: '#e6fffb',
+  },
+  categoryOptionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0f1923',
+  },
+  categoryOptionTitleSelected: {
+    color: '#008b8c',
+  },
+  categoryOptionMeta: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 2,
+  },
+  categoryOptionMetaSelected: {
+    color: '#008b8c',
+  },
+  emptyCategoryText: {
+    color: '#64748b',
+    fontSize: 13,
+    marginBottom: 18,
+  },
   uploadBtn: {
     backgroundColor: '#e2e8f0',
-    padding: 20,
+    padding: 18,
     borderRadius: 8,
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 12,
     borderStyle: 'dashed',
     borderWidth: 2,
     borderColor: '#94a3b8',
@@ -41,78 +109,27 @@ export default StyleSheet.create({
     color: '#475569',
     fontWeight: '600',
     fontSize: 14,
-<<<<<<< HEAD
-  }
-});
-=======
+    textAlign: 'center',
   },
-  categoryBox: {
-    marginBottom: 18,
+  uploadSelected: {
+    borderColor: '#22c55e',
+    backgroundColor: '#dcfce7',
   },
-  categorySelect: {
-    minHeight: 52,
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    flexDirection: 'row',
+  uploadSelectedText: {
+    color: '#166534',
+  },
+  logoutButton: {
+    marginTop: 30,
+    marginBottom: 20,
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  categorySelectTextBox: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  categorySelectText: {
-    color: '#0f172a',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  categoryPlaceholder: {
-    color: '#94a3b8',
-    fontWeight: '600',
-  },
-  categorySelectMeta: {
-    color: '#64748b',
-    fontSize: 12,
-    marginTop: 3,
-  },
-  categoryChevron: {
-    color: '#0f172a',
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  categoryList: {
-    marginTop: 8,
-    gap: 8,
-  },
-  categoryOption: {
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
+    padding: 15,
+    backgroundColor: '#fee2e2',
     borderRadius: 8,
-    padding: 12,
   },
-  categoryOptionSelected: {
-    borderColor: '#00b7b3',
-    backgroundColor: '#e6fffb',
-  },
-  categoryTitle: {
-    color: '#0f172a',
-    fontSize: 14,
+  logoutText: {
+    color: '#dc2626',
     fontWeight: '700',
+    fontSize: 15,
   },
-  categoryMeta: {
-    color: '#64748b',
-    fontSize: 12,
-    marginTop: 4,
-  },
-  helperText: {
-    color: '#64748b',
-    fontSize: 13,
-    marginTop: 8,
-  }
 });
->>>>>>> ajustes-rotas-submissao
+

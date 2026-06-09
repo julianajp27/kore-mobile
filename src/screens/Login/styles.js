@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+﻿import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
   container: {
@@ -35,6 +35,18 @@ export default StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
+  loading: {
+    marginTop: 20,
+  },
+  firstAccessButton: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  firstAccessText: {
+    color: '#0066CC',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
   footer: {
     position: 'absolute',
     bottom: 20,
@@ -42,5 +54,5 @@ export default StyleSheet.create({
   footerText: {
     color: '#64748b',
     fontSize: 12,
-  }
+  },
 });
