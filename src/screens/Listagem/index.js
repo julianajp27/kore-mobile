@@ -54,10 +54,6 @@ export default function Listagem({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-<<<<<<< HEAD
-      setLoading(true); 
-=======
->>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
       carregarAtividades();
     }, [])
   );
@@ -83,12 +79,7 @@ export default function Listagem({ navigation }) {
         return;
       }
 
-<<<<<<< HEAD
-      setAtividades(data.reverse()); 
-
-=======
       setAtividades(normalizarLista(data).slice().reverse());
->>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
     } catch (error) {
       Alert.alert('Erro', 'Falha na conexão com o servidor.');
     } finally {
@@ -150,27 +141,6 @@ export default function Listagem({ navigation }) {
     );
   };
 
-<<<<<<< HEAD
-  const renderItem = ({ item }) => {
-    const isAprovado = item.status === 'Aprovado' || item.status === 'Aprovada';
-
-    return (
-      <View style={styles.itemCard}>
-        <View style={styles.itemInfo}>
-          <Text style={styles.itemTitle} numberOfLines={2}>{item.titulo}</Text>
-          <Text style={styles.itemHours}>{item.cargaHoraria} horas</Text> 
-        </View>
-        <View style={[styles.badge, isAprovado ? styles.badgeApproved : styles.badgePending]}>
-          <Text style={[styles.badgeText, isAprovado ? styles.badgeTextApproved : styles.badgeTextPending]}>
-            {item.status || 'Pendente'}
-          </Text>
-        </View>
-      </View>
-    );
-  };
-
-=======
->>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -185,17 +155,6 @@ export default function Listagem({ navigation }) {
         data={atividades}
         keyExtractor={(item, index) => item._id || String(index)}
         renderItem={renderItem}
-<<<<<<< HEAD
-        contentContainerStyle={{ padding: 20 }}
-        ListEmptyComponent={<Text style={styles.emptyText}>Nenhuma atividade submetida ainda.</Text>}
-      />
-
-      <TouchableOpacity 
-        style={styles.logoutButton} 
-        onPress={handleLogout}
-      >
-        <Text style={styles.logoutButtonText}>Sair do Sistema</Text>
-=======
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <View style={styles.header}>
@@ -210,7 +169,6 @@ export default function Listagem({ navigation }) {
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Sair do Sistema</Text>
->>>>>>> e7b22ee16ea72d27fe77cf128aa8771af80427ed
       </TouchableOpacity>
     </View>
   );
