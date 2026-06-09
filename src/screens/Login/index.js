@@ -1,3 +1,15 @@
+<<<<<<< HEAD
+import React, { useState } from 'react';
+import { View, Text, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import styles from './styles';
+
+// Importando os nossos componentes modulares
+import CustomInput from '../../components/CustomInput';
+import CustomButton from '../../components/CustomButton';
+
+export default function Login({ navigation }) {
+=======
 ﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Text, TouchableOpacity, View } from 'react-native';
@@ -17,10 +29,34 @@ export default function Login({ navigation }) {
   const [matriculaAcesso, setMatriculaAcesso] = useState('');
 
   // --- ESTADOS NORMAIS DE LOGIN ---
+>>>>>>> ajustes-rotas-submissao
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
+<<<<<<< HEAD
+    try {
+      const res = await fetch('https://sistema-gestao-atividades-complementares.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), senha: password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        Alert.alert('Erro', data.message || data.mensagem || 'Erro ao fazer login');
+        return;
+      }
+
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(data.usuario));
+
+      navigation.replace('AlunoArea'); 
+
+    } catch (error) {
+      Alert.alert('Erro', 'Erro de conexão com o servidor.');
+=======
     // ---------------------------------------------------------
     // FLUXO 1: PRIMEIRO ACESSO (CRIAR SENHA)
     // ---------------------------------------------------------
@@ -93,6 +129,7 @@ export default function Login({ navigation }) {
       } finally {
         setLoading(false); // Desliga a bolinha
       }
+>>>>>>> ajustes-rotas-submissao
     }
   };
 
@@ -105,6 +142,19 @@ export default function Login({ navigation }) {
           <Text style={styles.subtitle}>Sistema de Gestão de Atividades Complementares</Text>
         </View>
 
+<<<<<<< HEAD
+        {/* Usando nossos Componentes Customizados */}
+        <CustomInput 
+          label="Email" 
+          placeholder="seu@email.com" 
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+        />
+
+        <CustomInput 
+          label="Senha" 
+=======
         {isPrimeiroAcesso && (
           <CustomInput 
             label="Matrícula" 
@@ -125,12 +175,19 @@ export default function Login({ navigation }) {
 
         <CustomInput 
           label={isPrimeiroAcesso ? "Nova Senha" : "Senha"} 
+>>>>>>> ajustes-rotas-submissao
           placeholder="••••••••" 
           secureTextEntry={true}
           value={password}
           onChangeText={setPassword}
         />
 
+<<<<<<< HEAD
+        <CustomButton 
+          title="Entrar" 
+          onPress={handleLogin} 
+        />
+=======
         {/* Lógica Visual: Se estiver carregando mostra a bolinha, senão mostra o botão */}
         {loading ? (
           <ActivityIndicator size="large" color="#0066CC" style={{ marginTop: 20 }} />
@@ -152,6 +209,7 @@ export default function Login({ navigation }) {
               : "Primeiro Acesso? Clique aqui"}
           </Text>
         </TouchableOpacity>
+>>>>>>> ajustes-rotas-submissao
 
       </View>
       

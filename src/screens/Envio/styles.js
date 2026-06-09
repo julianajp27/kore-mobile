@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { StyleSheet } from 'react-native';
+=======
 ﻿import { StyleSheet } from 'react-native';
+>>>>>>> ajustes-rotas-submissao
 
 export default StyleSheet.create({
   container: {
@@ -37,6 +41,10 @@ export default StyleSheet.create({
     color: '#475569',
     fontWeight: '600',
     fontSize: 14,
+<<<<<<< HEAD
+  }
+});
+=======
   },
   categoryBox: {
     marginBottom: 18,
@@ -107,3 +115,4 @@ export default StyleSheet.create({
     marginTop: 8,
   }
 });
+>>>>>>> ajustes-rotas-submissao
