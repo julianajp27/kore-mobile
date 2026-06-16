@@ -1,4 +1,4 @@
-﻿import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
@@ -30,7 +30,13 @@ function labelStatus(status) {
 }
 
 function obterHoras(item) {
-  return item.cargaHorariaValidada || item.cargaHorariaInformada || item.cargaHoraria || 0;
+  const status = normalizarStatus(item.status);
+
+  if (status === 'aprovada') {
+    return item.cargaHorariaValidada || 0;
+  }
+
+  return item.cargaHorariaInformada || item.cargaHoraria || 0;
 }
 
 function obterCategoria(item) {
@@ -80,7 +86,7 @@ export default function Listagem({ navigation }) {
       }
 
       setAtividades(normalizarLista(data).slice().reverse());
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Erro', 'Falha na conexão com o servidor.');
     } finally {
       setLoading(false);
