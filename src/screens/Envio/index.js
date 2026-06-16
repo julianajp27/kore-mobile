@@ -1,4 +1,4 @@
-﻿import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect } from '@react-navigation/native';
@@ -20,23 +20,22 @@ export default function Envio({ navigation }) {
   const [arquivo, setArquivo] = useState(null);
 
   const [cursoId, setCursoId] = useState('');
+  const [cursos, setCursos] = useState([]);
+  const [cursoAberto, setCursoAberto] = useState(false);
   const [categoriaId, setCategoriaId] = useState('');
   const [categorias, setCategorias] = useState([]);
   const [categoriaAberta, setCategoriaAberta] = useState(false);
 
-  useFocusEffect(
-    useCallback(() => {
-      carregarCategorias();
-    }, [])
-  );
-
-  const carregarCategorias = async () => {
+  const carregarCategorias = useCallback(async (cursoSelecionadoId = '') => {
     try {
       setCarregandoCategorias(true);
 
       const token = await AsyncStorage.getItem('token');
+      const endpoint = cursoSelecionadoId
+        ? `/api/alunos/categorias?cursoId=${encodeURIComponent(cursoSelecionadoId)}`
+        : '/api/alunos/categorias';
 
-      const response = await fetch(apiUrl('/api/alunos/categorias'), {
+      const response = await fetch(apiUrl(endpoint), {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`
@@ -51,17 +50,38 @@ export default function Envio({ navigation }) {
       }
 
       const lista = Array.isArray(data) ? data : data.categorias || data.data || [];
+      const cursosRecebidos = Array.isArray(data.cursos) ? data.cursos : [];
+      const novoCursoId = data.cursoId || cursoSelecionadoId || cursosRecebidos[0]?._id || cursosRecebidos[0]?.id || '';
 
+      setCursos(cursosRecebidos);
       setCategorias(lista);
-      setCursoId(data.cursoId || data.curso?._id || lista[0]?.curso?._id || lista[0]?.curso || '');
-    } catch (error) {
+      setCursoId(novoCursoId);
+      setCategoriaId((categoriaAtualId) => (
+        lista.some((categoria) => categoria._id === categoriaAtualId) ? categoriaAtualId : ''
+      ));
+    } catch (_error) {
       setCategorias([]);
     } finally {
       setCarregandoCategorias(false);
     }
-  };
+  }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      carregarCategorias(cursoId);
+    }, [carregarCategorias, cursoId])
+  );
+
+  const cursoSelecionado = cursos.find((curso) => String(curso._id || curso.id) === String(cursoId));
   const categoriaSelecionada = categorias.find((categoria) => categoria._id === categoriaId);
+
+  const handleSelecionarCurso = (novoCursoId) => {
+    setCursoId(novoCursoId);
+    setCategoriaId('');
+    setCategoriaAberta(false);
+    setCursoAberto(false);
+    carregarCategorias(novoCursoId);
+  };
 
   const handleSelecionarArquivo = async () => {
     try {
@@ -73,7 +93,7 @@ export default function Envio({ navigation }) {
       if (!result.canceled) {
         setArquivo(result.assets[0]);
       }
-    } catch (err) {
+    } catch (_err) {
       Alert.alert('Erro', 'Não foi possível selecionar o arquivo.');
     }
   };
@@ -103,14 +123,14 @@ export default function Envio({ navigation }) {
           mimeType: asset.mimeType || 'image/jpeg',
         });
       }
-    } catch (err) {
+    } catch (_err) {
       Alert.alert('Erro', 'Não foi possível abrir a câmera.');
     }
   };
 
   const handleEnviar = async () => {
-    if (!titulo.trim() || !categoriaId || !horas || !arquivo) {
-      Alert.alert('Atenção', 'Preencha título, categoria, carga horária e anexe um certificado.');
+    if (!titulo.trim() || !cursoId || !categoriaId || !horas || !arquivo) {
+      Alert.alert('Atenção', 'Preencha título, curso, categoria, carga horária e anexe um certificado.');
       return;
     }
 
@@ -158,13 +178,14 @@ export default function Envio({ navigation }) {
             setDataRealizacao('');
             setHoras('');
             setArquivo(null);
+            setCursoAberto(false);
             setCategoriaId('');
             setCategoriaAberta(false);
             navigation.navigate('Certificados');
           }
         }
       ]);
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Erro', 'Falha na conexão com o servidor.');
     } finally {
       setLoading(false);
@@ -212,9 +233,53 @@ export default function Envio({ navigation }) {
           onChangeText={setDataRealizacao}
         />
 
+        <Text style={styles.label}>Curso</Text>
+
+        <TouchableOpacity style={styles.categorySelect} onPress={() => setCursoAberto(!cursoAberto)} disabled={loading || carregandoCategorias}>
+          <View style={styles.categorySelectTextBox}>
+            <Text style={[styles.categorySelectText, !cursoSelecionado && styles.categoryPlaceholder]}>
+              {cursoSelecionado ? cursoSelecionado.nome : 'Selecionar curso'}
+            </Text>
+
+            {cursoSelecionado?.codigo ? (
+              <Text style={styles.categorySelectMeta}>{cursoSelecionado.codigo}</Text>
+            ) : null}
+          </View>
+
+          <Text style={styles.categoryChevron}>{cursoAberto ? '⌃' : '⌄'}</Text>
+        </TouchableOpacity>
+
+        {cursoAberto ? (
+          <View style={styles.categoryList}>
+            {cursos.length ? cursos.map((curso) => {
+              const id = curso._id || curso.id;
+              const selecionado = String(cursoId) === String(id);
+
+              return (
+                <TouchableOpacity
+                  key={id}
+                  style={[styles.categoryOption, selecionado && styles.categoryOptionSelected]}
+                  onPress={() => handleSelecionarCurso(id)}
+                >
+                  <Text style={[styles.categoryOptionTitle, selecionado && styles.categoryOptionTitleSelected]}>
+                    {curso.nome}
+                  </Text>
+                  {curso.codigo ? (
+                    <Text style={[styles.categoryOptionMeta, selecionado && styles.categoryOptionMetaSelected]}>
+                      {curso.codigo}
+                    </Text>
+                  ) : null}
+                </TouchableOpacity>
+              );
+            }) : (
+              <Text style={styles.emptyCategoryText}>Nenhum curso disponível.</Text>
+            )}
+          </View>
+        ) : null}
+
         <Text style={styles.label}>Categoria</Text>
 
-        <TouchableOpacity style={styles.categorySelect} onPress={() => setCategoriaAberta(!categoriaAberta)} disabled={loading}>
+        <TouchableOpacity style={styles.categorySelect} onPress={() => setCategoriaAberta(!categoriaAberta)} disabled={loading || carregandoCategorias || !cursoId}>
           <View style={styles.categorySelectTextBox}>
             <Text style={[styles.categorySelectText, !categoriaSelecionada && styles.categoryPlaceholder]}>
               {categoriaSelecionada ? categoriaSelecionada.nome : 'Selecionar categoria'}

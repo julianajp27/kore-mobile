@@ -1,4 +1,4 @@
-﻿import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
@@ -21,12 +21,7 @@ function normalizarStatus(status) {
 }
 
 function obterHorasAprovadas(atividade) {
-  return Number(
-    atividade.cargaHorariaValidada ||
-    atividade.cargaHoraria ||
-    atividade.cargaHorariaInformada ||
-    0
-  );
+  return Number(atividade.cargaHorariaValidada || 0);
 }
 
 function obterHorasPendentes(atividade) {
@@ -113,7 +108,7 @@ export default function Dashboard({ navigation }) {
       setHorasAprovadas(aprovadasHoras);
       setHorasEmAnalise(pendentesHoras);
       setReprovadas(qtdReprovadas);
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Erro', 'Falha ao carregar dados do dashboard.');
     } finally {
       setLoading(false);
