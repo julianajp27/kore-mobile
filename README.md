@@ -36,24 +36,43 @@ A aplicação segue uma arquitetura baseada em componentes e separação por res
 Estrutura Geral
 kore-mobile/
 │
+
 ├── App.js
+
 ├── assets/
+
 │ └── images/
+
 ├── src/
+
 │ ├── components/
+
 │ │ ├── CustomButton.js
+
 │ │ └── CustomInput.js
+
 │ ├── routes/
+
 │ │ ├── index.js
+
 │ │ └── aluno.routes.js
+
 │ ├── screens/
+
 │ │ ├── Login/
+
 │ │ ├── Dashboard/
+
 │ │ ├── Envio/
+
 │ │ └── Listagem/
+
 │ └── services/
+
 │ └── api.js
+
 ├── package.json
+
 └── app.json
 
 🧩 Camadas da Aplicação
