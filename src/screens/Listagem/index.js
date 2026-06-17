@@ -43,6 +43,10 @@ function obterCategoria(item) {
   return item.categoriaId?.nome || item.categoria?.nome || item.categoria || 'Categoria não informada';
 }
 
+function obterCurso(item) {
+  return item.cursoId?.nome || item.curso?.nome || '';
+}
+
 function obterJustificativa(item) {
   return (
     item.justificativaReprovacao ||
@@ -110,12 +114,21 @@ export default function Listagem({ navigation }) {
   const renderItem = ({ item }) => {
     const status = normalizarStatus(item.status);
     const justificativa = obterJustificativa(item);
+    const nomeCurso = obterCurso(item);
 
     return (
       <View style={styles.itemCard}>
         <View style={styles.itemHeader}>
           <View style={styles.itemContent}>
             <Text style={styles.itemTitle}>{item.titulo || 'Atividade sem título'}</Text>
+            
+            {/* Nova etiqueta com o nome do Curso */}
+            {nomeCurso ? (
+              <Text style={{ fontSize: 13, color: '#00B7B8', fontWeight: 'bold', marginTop: 2, marginBottom: 2 }}>
+                {nomeCurso}
+              </Text>
+            ) : null}
+
             <Text style={styles.itemCategory}>{obterCategoria(item)}</Text>
             <Text style={styles.itemHours}>{obterHoras(item)} horas</Text>
           </View>

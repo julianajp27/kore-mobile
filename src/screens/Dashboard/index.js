@@ -32,9 +32,8 @@ function obterHorasPendentes(atividade) {
   );
 }
 
-function obterMetaHoras(user, curso) {
+function obterMetaHoras(user) {
   return Number(
-    curso?.cargaHorariaTotalComplementar ||
     user?.curso?.cargaHorariaTotalComplementar ||
     user?.cursoId?.cargaHorariaTotalComplementar ||
     user?.cargaHorariaTotalComplementar ||
@@ -42,15 +41,8 @@ function obterMetaHoras(user, curso) {
   );
 }
 
-function obterIdCurso(curso) {
-  return curso?._id || curso?.id || '';
-}
-
 export default function Dashboard({ navigation }) {
   const [nomeAluno, setNomeAluno] = useState('Aluno');
-  const [cursos, setCursos] = useState([]);
-  const [cursoId, setCursoId] = useState('');
-  const [cursoAberto, setCursoAberto] = useState(false);
   const [horasAprovadas, setHorasAprovadas] = useState(0);
   const [horasEmAnalise, setHorasEmAnalise] = useState(0);
   const [totalAtividades, setTotalAtividades] = useState(0);
@@ -58,7 +50,18 @@ export default function Dashboard({ navigation }) {
   const [metaHoras, setMetaHoras] = useState(100);
   const [loading, setLoading] = useState(true);
 
-  const carregarDadosDoDashboard = useCallback(async (cursoSelecionadoId = '') => {
+  // Novos estados para controlar a seleção de cursos
+  const [cursoId, setCursoId] = useState('');
+  const [cursos, setCursos] = useState([]);
+  const [cursoAberto, setCursoAberto] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      carregarDadosDoDashboard();
+    }, [cursoId]) // Atualiza sempre que o cursoId mudar
+  );
+
+  const carregarDadosDoDashboard = async () => {
     try {
       setLoading(true);
 
@@ -66,41 +69,33 @@ export default function Dashboard({ navigation }) {
       const user = userString ? JSON.parse(userString) : {};
 
       if (user.nome) setNomeAluno(user.nome.split(' ')[0]);
+      setMetaHoras(obterMetaHoras(user));
 
       const token = await AsyncStorage.getItem('token');
 
-      const cursosResponse = await fetch(apiUrl('/api/alunos/meus-cursos'), {
+      // 1. Busca os cursos do aluno
+      const categoriasResponse = await fetch(apiUrl('/api/alunos/categorias'), {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
-      const cursosData = await cursosResponse.json();
+      let currentCursoId = cursoId;
 
-      if (!cursosResponse.ok) {
-        Alert.alert('Erro', cursosData.message || 'Não foi possível carregar seus cursos.');
-        return;
+      if (categoriasResponse.ok) {
+        const categoriasData = await categoriasResponse.json();
+        const cursosRecebidos = Array.isArray(categoriasData.cursos) ? categoriasData.cursos : [];
+        setCursos(cursosRecebidos);
+        
+        // Define o primeiro curso como padrão se não houver nenhum selecionado
+        if (!currentCursoId && cursosRecebidos.length > 0) {
+          currentCursoId = categoriasData.cursoId || cursosRecebidos[0]._id || cursosRecebidos[0].id;
+          setCursoId(currentCursoId);
+        }
       }
 
-      const cursosLista = Array.isArray(cursosData) ? cursosData : cursosData.cursos || cursosData.data || [];
-      const cursoSalvo = await AsyncStorage.getItem('dashboardCursoId');
-      const cursoPreferidoId = cursoSelecionadoId || cursoSalvo;
-      const cursoPreferidoPermitido = cursosLista.some((curso) =>
-        String(obterIdCurso(curso)) === String(cursoPreferidoId)
-      );
-      const cursoEscolhidoId = cursoPreferidoPermitido
-        ? cursoPreferidoId
-        : obterIdCurso(cursosLista[0]);
-      const cursoEscolhido = cursosLista.find((curso) => String(obterIdCurso(curso)) === String(cursoEscolhidoId));
-
-      setCursos(cursosLista);
-      setCursoId(cursoEscolhidoId || '');
-      setMetaHoras(obterMetaHoras(user, cursoEscolhido));
-
-      const endpointAtividades = cursoEscolhidoId
-        ? `/api/alunos/atividades?cursoId=${encodeURIComponent(cursoEscolhidoId)}`
+      // 2. Busca as atividades filtrando pelo curso selecionado
+      const endpointAtividades = currentCursoId 
+        ? `/api/alunos/atividades?cursoId=${encodeURIComponent(currentCursoId)}` 
         : '/api/alunos/atividades';
 
       const response = await fetch(apiUrl(endpointAtividades), {
@@ -148,20 +143,6 @@ export default function Dashboard({ navigation }) {
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      carregarDadosDoDashboard(cursoId);
-    }, [carregarDadosDoDashboard, cursoId])
-  );
-
-  const cursoSelecionado = cursos.find((curso) => String(obterIdCurso(curso)) === String(cursoId));
-
-  const selecionarCurso = async (novoCursoId) => {
-    setCursoId(novoCursoId);
-    setCursoAberto(false);
-    await AsyncStorage.setItem('dashboardCursoId', String(novoCursoId));
   };
 
   const handleLogout = () => {
@@ -172,16 +153,13 @@ export default function Dashboard({ navigation }) {
         onPress: async () => {
           await AsyncStorage.removeItem('token');
           await AsyncStorage.removeItem('user');
-          await AsyncStorage.removeItem('dashboardCursoId');
           navigation.replace('Login');
         }
       }
     ]);
   };
 
-  const progresso = metaHoras > 0
-    ? Math.min(100, Math.round((horasAprovadas / metaHoras) * 100))
-    : 0;
+  const progresso = Math.min(100, Math.round((horasAprovadas / metaHoras) * 100));
 
   if (loading) {
     return (
@@ -196,47 +174,46 @@ export default function Dashboard({ navigation }) {
       <Text style={styles.pageTitle}>Olá, {nomeAluno}</Text>
       <Text style={styles.subtitle}>Acompanhe suas atividades complementares.</Text>
 
-      <Text style={styles.selectorLabel}>Curso</Text>
-      <TouchableOpacity
-        style={styles.courseSelect}
-        onPress={() => setCursoAberto(!cursoAberto)}
-      >
-        <View style={styles.courseSelectTextBox}>
-          <Text style={[styles.courseSelectText, !cursoSelecionado && styles.coursePlaceholder]}>
-            {cursoSelecionado ? cursoSelecionado.nome : 'Selecionar curso'}
-          </Text>
-          {cursoSelecionado?.codigo ? (
-            <Text style={styles.courseSelectMeta}>{cursoSelecionado.codigo}</Text>
-          ) : null}
-        </View>
-        <Text style={styles.courseChevron}>{cursoAberto ? '^' : 'v'}</Text>
-      </TouchableOpacity>
+      {/* Bloco de Seleção de Curso (Aparece apenas se houver > 1 curso) */}
+      {cursos.length > 1 && (
+        <View style={{ marginBottom: 20 }}>
+          <Text style={styles.summaryLabel}>Curso selecionado</Text>
+          <TouchableOpacity
+            style={styles.statCardFull}
+            onPress={() => setCursoAberto(!cursoAberto)}
+          >
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
+              {cursos.find((c) => String(c._id || c.id) === String(cursoId))?.nome || 'Selecionar curso'}
+            </Text>
+          </TouchableOpacity>
 
-      {cursoAberto ? (
-        <View style={styles.courseList}>
-          {cursos.length ? cursos.map((curso) => {
-            const id = obterIdCurso(curso);
-            const selecionado = String(id) === String(cursoId);
-
-            return (
-              <TouchableOpacity
-                key={id}
-                style={[styles.courseOption, selecionado && styles.courseOptionSelected]}
-                onPress={() => selecionarCurso(id)}
-              >
-                <Text style={[styles.courseOptionTitle, selecionado && styles.courseOptionTitleSelected]}>
-                  {curso.nome}
-                </Text>
-                <Text style={[styles.courseOptionMeta, selecionado && styles.courseOptionMetaSelected]}>
-                  {curso.codigo || `${curso.cargaHorariaTotalComplementar || metaHoras}h complementares`}
-                </Text>
-              </TouchableOpacity>
-            );
-          }) : (
-            <Text style={styles.emptyCourseText}>Nenhum curso vinculado ao aluno.</Text>
+          {cursoAberto && (
+            <View style={[styles.statCardFull, { marginTop: 8, paddingVertical: 5 }]}>
+              {cursos.map((curso, index) => {
+                const id = curso._id || curso.id;
+                const isLast = index === cursos.length - 1;
+                return (
+                  <TouchableOpacity
+                    key={id}
+                    style={{ 
+                      paddingVertical: 12, 
+                      paddingHorizontal: 10,
+                      borderBottomWidth: isLast ? 0 : 1, 
+                      borderBottomColor: '#eee' 
+                    }}
+                    onPress={() => {
+                      setCursoId(id);
+                      setCursoAberto(false);
+                    }}
+                  >
+                    <Text style={{ fontSize: 16, color: '#555' }}>{curso.nome}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           )}
         </View>
-      ) : null}
+      )}
 
       <View style={styles.summaryCard}>
         <Text style={styles.summaryLabel}>Progresso aprovado</Text>

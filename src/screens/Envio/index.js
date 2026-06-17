@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import CustomButton from '../../components/CustomButton';
@@ -51,11 +51,19 @@ export default function Envio({ navigation }) {
 
       const lista = Array.isArray(data) ? data : data.categorias || data.data || [];
       const cursosRecebidos = Array.isArray(data.cursos) ? data.cursos : [];
-      const novoCursoId = data.cursoId || cursoSelecionadoId || cursosRecebidos[0]?._id || cursosRecebidos[0]?.id || '';
 
+      // Agora que o back-end está corrigido, podemos definir os cursos diretamente
       setCursos(cursosRecebidos);
       setCategorias(lista);
-      setCursoId(novoCursoId);
+
+      // Define um novo curso padrão apenas se nenhum estiver selecionado
+      if (!cursoSelecionadoId) {
+        const novoCursoId = data.cursoId || cursosRecebidos[0]?._id || cursosRecebidos[0]?.id || '';
+        if (novoCursoId) {
+          setCursoId(novoCursoId);
+        }
+      }
+
       setCategoriaId((categoriaAtualId) => (
         lista.some((categoria) => categoria._id === categoriaAtualId) ? categoriaAtualId : ''
       ));
