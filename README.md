@@ -1,39 +1,45 @@
-🎓 KORE Mobile
-Aplicativo mobile desenvolvido em React Native com Expo para o Sistema de Gestão de Atividades Complementares (KORE).
+# 🎓 KORE Mobile
+## Aplicativo mobile desenvolvido em React Native com Expo para o Sistema de Gestão de Atividades Complementares (KORE).
 
 O aplicativo permite que alunos realizem autenticação, enviem certificados de atividades complementares, acompanhem solicitações enviadas e visualizem o progresso das horas acadêmicas exigidas pelo curso.
 
-📱 Visão Geral
+
+# 📱 Visão Geral
 O KORE Mobile foi criado para simplificar o processo de gestão de atividades complementares, oferecendo ao aluno uma experiência prática e centralizada.
 
-Novidade: O aplicativo agora suporta alunos com múltiplas matrículas ativas, permitindo alternar entre diferentes cursos no Dashboard e realizar submissões específicas para cada curso de forma independente.
+
+**Novidade: O aplicativo agora suporta alunos com múltiplas matrículas ativas, permitindo alternar entre diferentes cursos no Dashboard e realizar submissões específicas para cada curso de forma independente.**
+
 
 A aplicação se comunica diretamente com a API do Sistema de Gestão de Atividades Complementares, permitindo:
 
-Login de alunos
+- Login de alunos
 
-Primeiro acesso com definição de senha
+- Primeiro acesso com definição de senha
 
-Visualização do dashboard acadêmico (suporte a múltiplos cursos)
+- Visualização do dashboard acadêmico (suporte a múltiplos cursos)
 
-Consulta de certificados enviados
+- Consulta de certificados enviados
 
-Envio de novas atividades
+- Envio de novas atividades
 
-Upload de documentos PDF
+- Upload de documentos PDF
 
-Captura de fotos do certificado pela câmera
+- Captura de fotos do certificado pela câmera
 
-Controle de horas aprovadas
+- Controle de horas aprovadas
 
-Controle de horas em análise
+- Controle de horas em análise
 
-Visualização de atividades reprovadas
+- Visualização de atividades reprovadas
 
-🏗 Arquitetura
+
+## 🏗 Arquitetura
+
 A aplicação segue uma arquitetura baseada em componentes e separação por responsabilidades.
 
-Estrutura Geral
+**Estrutura Geral**
+
 kore-mobile/
 │
 
@@ -75,134 +81,184 @@ kore-mobile/
 
 └── app.json
 
-🧩 Camadas da Aplicação
-1. Apresentação (Screens)
-Login
-Permite login tradicional, primeiro acesso e definição de senha inicial.
 
-Dashboard
-Apresenta progresso, horas aprovadas, horas em análise, atividades totais e reprovadas. Inclui seletor de cursos para alunos com múltiplas matrículas.
+## 🧩 Camadas da Aplicação
+**1. Apresentação (Screens)**
 
-Certificados
-Lista todas as atividades enviadas. Exibe título, categoria, status, horas e justificativas de reprovação.
+- Login
+  
+  Permite login tradicional, primeiro acesso e definição de senha inicial.
 
-Envio
-Tela para envio de certificados. Permite seleção do curso, categoria, upload de PDF, captura por câmera, carga horária e descrição da atividade.
+- Dashboard
+  
+  Apresenta progresso, horas aprovadas, horas em análise, atividades totais e reprovadas. Inclui seletor de cursos para alunos com múltiplas matrículas.
 
-2. Componentes Reutilizáveis
-CustomButton: Botão padronizado.
+- Certificados
+  
+  Lista todas as atividades enviadas. Exibe título, categoria, status, horas e justificativas de reprovação.
 
-CustomInput: Campo de entrada reutilizável.
+- Envio
+  
+  Tela para envio de certificados. Permite seleção do curso, categoria, upload de PDF, captura por câmera, carga horária e descrição da atividade.
 
-3. Navegação
-Utiliza React Navigation.
 
-Stack Navigation: Fluxo principal (Login → Área do Aluno).
+## 2. Componentes Reutilizáveis
 
-Bottom Tab Navigation: Dashboard, Certificados, Enviar.
+- CustomButton: Botão padronizado.
 
-4. Serviços
-API
-Arquivo: src/services/api.js
+- CustomInput: Campo de entrada reutilizável.
 
-export const API_BASE_URL = 'https://sistema-gestao-atividades-complementares.onrender.com';
 
-Fluxo de Autenticação
-Login: POST /api/alunos/auth/login
+## 3. Navegação
 
-Primeiro Acesso: POST /api/alunos/auth/primeiro-acesso
-O token é armazenado localmente utilizando AsyncStorage.
+- Utiliza React Navigation.
 
-Dashboard
-Ao acessar o Dashboard são realizadas consultas para:
+- Stack Navigation: Fluxo principal (Login → Área do Aluno).
 
-GET /api/alunos/meus-cursos
+- Bottom Tab Navigation: Dashboard, Certificados, Enviar.
 
-GET /api/alunos/atividades ou GET /api/alunos/atividades?cursoId=ID
 
-Envio de Certificados
-Endpoint: POST /api/alunos/atividades
+## 4. Serviços
 
-Upload: multipart/form-data (PDF, JPG, JPEG, PNG)
+- API
+  
+  Arquivo: src/services/api.js
 
-Bibliotecas: expo-document-picker e expo-image-picker
+  export const API_BASE_URL = 'https://sistema-gestao-atividades-complementares.onrender.com';
 
-Listagem de Certificados
-Consulta: GET /api/alunos/atividades
-Exibindo: Título, Categoria, Horas, Status e Justificativa de reprovação.
+- Fluxo de Autenticação
 
-Persistência Local
-Utiliza AsyncStorage para manter o token, dados do usuário e o curso selecionado no dashboard.
+  Login: POST /api/alunos/auth/login
 
-🚀 Tecnologias Utilizadas
-Framework: React Native 0.81.5
+- Primeiro Acesso:
 
-Plataforma: Expo SDK 54
+  POST /api/alunos/auth/primeiro-acesso
 
-Navegação: React Navigation
+  O token é armazenado localmente utilizando AsyncStorage.
 
-Armazenamento: AsyncStorage
+- Dashboard
 
-Upload: Expo Document Picker
+  Ao acessar o Dashboard são realizadas consultas para:
 
-Câmera: Expo Image Picker
+    GET /api/alunos/meus-cursos
 
-Ícones: Expo Vector Icons
+    GET /api/alunos/atividades ou GET /api/alunos/atividades?cursoId=ID
 
-📦 Dependências Principais
+- Envio de Certificados
+
+  Endpoint: POST /api/alunos/atividades
+
+  Upload: multipart/form-data (PDF, JPG, JPEG, PNG)
+
+  Bibliotecas: expo-document-picker e expo-image-picker
+
+- Listagem de Certificados
+
+  Consulta: GET /api/alunos/atividades
+
+  Exibindo: Título, Categoria, Horas, Status e Justificativa de reprovação.
+
+  Persistência Local
+  
+    Utiliza AsyncStorage para manter o token, dados do usuário e o curso selecionado no dashboard.
+  
+
+## 🚀 Tecnologias Utilizadas
+
+- Framework: React Native 0.81.5
+
+- Plataforma: Expo SDK 54
+
+- Navegação: React Navigation
+
+- Armazenamento: AsyncStorage
+
+- Upload: Expo Document Picker
+
+- Câmera: Expo Image Picker
+
+- Ícones: Expo Vector Icons
+  
+
+## 📦 Dependências Principais
+
 {
 "@react-navigation/native": "^7.2.5",
+
 "@react-navigation/stack": "^7.9.3",
+
 "@react-navigation/bottom-tabs": "^7.16.2",
+
 "@react-native-async-storage/async-storage": "2.2.0",
+
 "expo-document-picker": "~14.0.8",
+
 "expo-image-picker": "~17.0.8",
+
 "react-native": "0.81.5",
+
 "expo": "~54.0.34"
+
 }
 
-⚙️ Requisitos
-Node.js 18+
 
-npm 10+
+## ⚙️ Requisitos
 
-Expo Go
+- Node.js 18+
 
-Android ou iOS
+- npm 10+
 
-🔧 Instalação
-Clone o projeto: git clone https://github.com/julianajp27/kore-mobile.git
+- Expo Go
 
-Entre na pasta: cd kore-mobile
+- Android ou iOS
+  
 
-Instale as dependências: npm install
+## 🔧 Instalação
 
-▶️ Executando o Projeto
-Inicie o Expo:
-npx expo start
+-> Clone o projeto: git clone https://github.com/julianajp27/kore-mobile.git
 
-🔄 Integração com Backend
-O aplicativo consome a API: Sistema de Gestão de Atividades Complementares.
-Segurança: Autenticação via token Bearer JWT enviada em todas as requisições autenticadas.
+-> Entre na pasta: cd kore-mobile
 
-🚧 Melhorias Futuras
-Notificações Push
+-> Instale as dependências: npm install
 
-Recuperação de senha
 
-Perfil do aluno
+## ▶️ Executando o Projeto
 
-Download de certificados enviados
+-> Inicie o Expo:
+    
+    npx expo start
 
-Modo offline
+## 🔄 Integração com Backend
 
-Dashboard com gráficos
+- O aplicativo consome a API: Sistema de Gestão de Atividades Complementares.
 
-Filtros avançados
+- Segurança: Autenticação via token Bearer JWT enviada em todas as requisições autenticadas.
 
-👨‍💻 Equipe
-Aline Souza, Ingrid Rosendo, Juliana Jardim, Julliane Valentin, Lucas Querubim, Renata Gusmão.
-Projeto desenvolvido para a disciplina de CODING: MOBILE.
 
-📄 Licença
+## 🚧 Melhorias Futuras
+
+- Notificações Push
+
+- Recuperação de senha
+
+- Perfil do aluno
+
+- Download de certificados enviados
+
+- Modo offline
+
+- Dashboard com gráficos
+
+- Filtros avançados
+
+
+## 👨‍💻 Equipe
+
+**Aline Souza, Ingrid Rosendo, Juliana Jardim, Julliane Valentin, Lucas Querubim, Renata Gusmão.**
+
+**Projeto desenvolvido para a disciplina de CODING: MOBILE.**
+
+
+## 📄 Licença
+
 Projeto desenvolvido para fins acadêmicos e educacionais.
